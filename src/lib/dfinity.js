@@ -1,8 +1,8 @@
 import { Actor, HttpAgent } from '@dfinity/agent';
-import { idlFactory } from '../declarations/crowdfunding_platform/crowdfunding_platform.did.js';
+import { idlFactory } from '../declarations/crowdfunding_platform/bitchanga_backend.did.js';
 
-const LOCAL_CANISTER_ID = "YOUR_LOCAL_CANISTER_ID"; // Replace with your canister ID
-const LOCAL_HOST = "http://localhost:8000";
+const LOCAL_CANISTER_ID = "bkyz2-fmaaa-aaaaa-qaaaq-cai"; // Replace with your canister ID
+const LOCAL_HOST = "http://localhost:4943";
 
 export async function createActor() {
   const agent = new HttpAgent({ host: LOCAL_HOST });

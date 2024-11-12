@@ -9,10 +9,12 @@ import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { NotificationToast } from '@/components/ui/NotificationToast';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AuthClient } from '@dfinity/auth-client';
 
 export default function Platform() {
   const [isConnected, setIsConnected] = useState(false);
   const [actor, setActor] = useState(null);
+  const [principal, setPrincipal] = useState(null); // New state for Principal ID
   const [milestones, setMilestones] = useState([]);
   const [totalContributions, setTotalContributions] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -20,12 +22,36 @@ export default function Platform() {
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    initializeActor();
+    initializeAuthClient();
   }, []);
 
-  const initializeActor = async () => {
+  const initializeAuthClient = async () => {
     try {
-      const platformActor = await createActor();
+      const authClient = await AuthClient.create();
+      
+      if (await authClient.isAuthenticated()) {
+        const identity = authClient.getIdentity();
+        setPrincipal(identity.getPrincipal().toText()); // Store the principal ID
+        await initializeActor(identity);
+      } else {
+        await authClient.login({
+          identityProvider: 'https://identity.ic0.app',
+          onSuccess: async () => {
+            const identity = authClient.getIdentity();
+            setPrincipal(identity.getPrincipal().toText()); // Store the principal ID
+            await initializeActor(identity);
+          },
+        });
+      }
+    } catch (err) {
+      setError('Failed to connect to Internet Identity');
+      setLoading(false);
+    }
+  };
+
+  const initializeActor = async (identity) => {
+    try {
+      const platformActor = await createActor(identity);
       setActor(platformActor);
       setIsConnected(true);
       await loadPlatformData(platformActor);
@@ -75,10 +101,11 @@ export default function Platform() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-6 bg-gray-50 min-h-screen">
       <Header 
         isConnected={isConnected} 
         totalContributions={totalContributions} 
+        principal={principal} // Pass principal to Header
       />
       <ContributionForm 
         actor={actor} 
