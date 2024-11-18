@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -8,9 +7,20 @@ const app = express();
 app.use(bodyParser.json());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log(err));
+const uri = process.env.MONGO_URI;
+
+if (!uri) {
+  console.error('Error: MONGO_URI is not defined in the environment variables.');
+  process.exit(1); // Exit the application if MONGO_URI is undefined
+}
+
+mongoose
+  .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1); // Exit if MongoDB connection fails
+  });
 
 // Import routes
 const userRoutes = require('./routes/user');
