@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, Rocket, Target, Coins, Upload } from 'lucide-react';
 
 const BuilderOnboarding = () => {

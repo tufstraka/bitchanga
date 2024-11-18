@@ -14,7 +14,7 @@ import { AuthClient } from '@dfinity/auth-client';
 export default function Platform() {
   const [isConnected, setIsConnected] = useState(false);
   const [actor, setActor] = useState(null);
-  const [principal, setPrincipal] = useState(null); // New state for Principal ID
+  const [principal, setPrincipal] = useState(null); 
   const [milestones, setMilestones] = useState([]);
   const [totalContributions, setTotalContributions] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -31,14 +31,14 @@ export default function Platform() {
       
       if (await authClient.isAuthenticated()) {
         const identity = authClient.getIdentity();
-        setPrincipal(identity.getPrincipal().toText()); // Store the principal ID
+        setPrincipal(identity.getPrincipal().toText()); 
         await initializeActor(identity);
       } else {
         await authClient.login({
           identityProvider: 'https://identity.ic0.app',
           onSuccess: async () => {
             const identity = authClient.getIdentity();
-            setPrincipal(identity.getPrincipal().toText()); // Store the principal ID
+            setPrincipal(identity.getPrincipal().toText()); 
             await initializeActor(identity);
           },
         });
