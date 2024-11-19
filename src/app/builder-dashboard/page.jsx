@@ -76,7 +76,7 @@ const DashboardWithProvider = () => {
 
 const BuilderDashboard = () => {
   const { wallet, connect, disconnect, isLoading: isWalletLoading } = useWallet();
-  const { ledgerCanister, fetchMetadata, fetchBalance, metadata, balance } = useCkBtcLedger();
+  const { initializeLedger, ledgerCanister, fetchMetadata, fetchBalance, metadata, balance, ledger } = useCkBtcLedger();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [showWalletDetails, setShowWalletDetails] = useState(false);
@@ -100,8 +100,10 @@ const BuilderDashboard = () => {
       }
 
       await connect();
+
+      //const ledger = initializeLedger();
       
-      await fetchBalance();
+      //await fetchBalance(ledger);
     } catch (err) {
       console.error('Failed to connect wallet:', err);
       setError(err.message || 'Failed to connect wallet');
@@ -188,13 +190,13 @@ const BuilderDashboard = () => {
                error ? 'Error loading balance' :
                balance !== null ? `${balance} ckBTC` : 'N/A'}
             </div>
-            {/*<button 
+            <button 
               onClick={fetchBalance}
               disabled={isLoading || !wallet?.principalId}
               className={`p-1 hover:bg-gray-200 rounded ${isLoading ? 'animate-spin' : ''}`}
             >
               <RefreshCw className="w-4 h-4" />
-            </button>*/}
+            </button>
           </div>
         </div>
 

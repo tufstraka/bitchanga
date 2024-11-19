@@ -165,6 +165,7 @@ export default function useCkBtcLedger() {
     ledgerCanister,
     metadata,
     balance,
+    initializeLedger,
     fetchMetadata,
     fetchBalance,
     error,

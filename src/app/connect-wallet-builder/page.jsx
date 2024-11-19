@@ -6,6 +6,9 @@ import { useWallet, WalletProvider } from '../../contexts/WalletContext';
 import dynamic from 'next/dynamic';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation'; 
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory } from '@/declarations/crowdfunding_platform/bitchanga_backend.did';
+import { Principal } from "@dfinity/principal";
 
 
 // Create a client-side only component for wallet interactions
@@ -17,6 +20,9 @@ const WalletConnect = dynamic(() => Promise.resolve(() => {
   const [isPlugInstalled, setIsPlugInstalled] = useState(false);
   const [isClientSide, setIsClientSide] = useState(false);
   const router = useRouter();
+
+  const canisterId = process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID;
+
 
 
   useEffect(() => {
@@ -55,6 +61,54 @@ const WalletConnect = dynamic(() => Promise.resolve(() => {
       return null;
     }
   };
+
+  const DashboardProceed = async () => {
+    try {
+      if (!wallet) {
+        throw new Error('No wallet connected');
+      }
+
+
+      await window.ic.plug.isConnected();
+      console.log("connected");
+
+      console.log('wallet', wallet);
+
+      let agent = wallet.agent.agent;
+      if (!wallet.agent) {
+        throw new Error('Agent not found in wallet');
+      }
+
+      if (!canisterId) {
+        throw new Error('Canister ID not provided');
+      }
+
+
+      const actorInstance = Actor.createActor(
+        idlFactory,
+        {
+          agent,
+          canisterId: Principal.fromText(canisterId),
+        }
+      );
+  
+      console.log('actorInstance', actorInstance);
+  
+      // Now you can interact with the actor methods
+      const fee = await actorInstance.getRegistrationFee();
+      console.log("fee", fee);
+  
+      const result = await actorInstance.register();
+      console.log("result", result);
+  
+      // Optionally, navigate to the dashboard
+      // router.push('/builder-dashboard');
+    } catch (err) {
+      console.error("Error in DashboardProceed:", err);
+      setError(err.message || 'An error occurred during the registration process');
+    }
+  };
+  
 
   const connectStoic = async () => {
     try {
@@ -105,7 +159,7 @@ const WalletConnect = dynamic(() => Promise.resolve(() => {
       </button>
 
       <button
-        onClick={ () => { router.push('/builder-dashboard')}}
+        onClick={DashboardProceed}
         className="mt-1 flex items-center space-x-2 mx-auto px-4 py-2 border border-red-200 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
       >
         <span>Proceed to Dashboard</span>

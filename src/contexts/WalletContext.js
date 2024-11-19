@@ -13,120 +13,94 @@ export const useWallet = () => {
 
 export const WalletProvider = ({ children }) => {
   const [wallet, setWallet] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // We need to ensure that window and localStorage access is done only on the client
-  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // Set to true once the component mounts on the client
-  }, []);
-
-  useEffect(() => {
-    if (!isClient) return; // Skip if we're on the server (hydration phase)
-
     const initializeWallet = async () => {
+      setIsLoading(true);
       try {
-        const savedWallet = localStorage.getItem('icp_wallet');
-
-        if (savedWallet) {
+        await connect();
+        /*const savedWallet = localStorage.getItem('icp_wallet');
+        if (savedWallet && window?.ic?.plug) {
           const walletData = JSON.parse(savedWallet);
-
-          if (walletData.type === 'plug' && window?.ic?.plug) {
+          if (walletData.type === 'plug') {
             const isConnected = await window.ic.plug.isConnected();
-
             if (isConnected) {
-              const principal = await window.ic.plug.agent.getPrincipal();
-              const agent = window.ic.plug.agent;
+              const principal = await window.ic.plug.getPrincipal();
+              const agent = await window.ic.plug.createAgent({
+                whitelist: walletData.whitelist,
+                host: walletData.host,
+              });
 
-              const safeWalletData = {
-                type: walletData.type,
+              setWallet({
+                type: 'plug',
                 principalId: principal.toString(),
                 connected: true,
-                agent, // Save the agent in the wallet state
-              };
-
-              setWallet(safeWalletData);
+                agent,
+              });
             } else {
               localStorage.removeItem('icp_wallet');
             }
           }
-        }
+        }*/
       } catch (error) {
-        console.error('Error restoring wallet connection:', error);
+        console.error('Error initializing wallet:', error);
         localStorage.removeItem('icp_wallet');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (isClient) {
-      initializeWallet();
-    }
-  }, [isClient]);
+    initializeWallet();
+  }, []);
 
   const connect = async (walletType = 'plug') => {
+    if (walletType !== 'plug') throw new Error('Unsupported wallet type');
+    if (!window?.ic?.plug) throw new Error('Plug wallet not found');
+
+    setIsLoading(true);
     try {
-      setIsLoading(true);
+      const whitelist = [
+        process.env.NEXT_PUBLIC_CKBTC_LEDGER_CANISTER_ID,
+        process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID,
+      ];
 
-      if (walletType === 'plug') {
-        if (!window?.ic?.plug) {
-          throw new Error('Plug wallet not found');
-        }
+      const host =
+        process.env.NODE_ENV === 'development'
+          ? process.env.NEXT_PUBLIC_IC_HOST || 'http://127.0.0.1:4943'
+          : process.env.NEXT_PUBLIC_IC_HOST || 'https://identity.ic0.app';
 
-        const whitelist = [process.env.NEXT_PUBLIC_CKBTC_LEDGER_CANISTER_ID];
+      const connected = await window.ic.plug.requestConnect({ whitelist, host });
+      if (!connected) throw new Error('User rejected connection');
 
-        const host =
-          process.env.NODE_ENV === 'development'
-            ? process.env.NEXT_PUBLIC_IC_HOST || 'http://127.0.0.1:4943'
-            : process.env.NEXT_PUBLIC_IC_HOST || 'https://identity.ic0.app';
+      const principal = await window.ic.plug.getPrincipal();
+      await window.ic.plug.createAgent({ whitelist, host });
 
-        const connectResult = await window.ic.plug.requestConnect({ whitelist, host });
+      const agent = window.ic.plug.agent;
 
-        if (!connectResult) {
-          throw new Error('User rejected connection');
-        }
+      const walletData = {
+        type: 'plug',
+        principalId: principal.toString(),
+        connected: true,
+        agent,
+        whitelist,
+        host,
+      };
 
-        const principal = await window.ic.plug.agent.getPrincipal();
-        const agent = window.ic.plug.agent; // Get the agent from Plug
-
-        const safeWalletData = {
-          type: 'plug',
-          principalId: principal.toString(),
-          connected: true,
-          agent, // Save the agent in the wallet state
-        };
-
-        setWallet(safeWalletData);
-        localStorage.setItem('icp_wallet', JSON.stringify(safeWalletData));
-      }
+      setWallet(walletData);
+      localStorage.setItem('icp_wallet', JSON.stringify(walletData));
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error('Error connecting to wallet:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const disconnect = async () => {
-    try {
-      setIsLoading(true);
-
-      if (wallet?.type === 'plug' && window?.ic?.plug) {
-        // Plug doesn't have a disconnect method, but we can clear our state
-      }
-
-      setWallet(null);
-      localStorage.removeItem('icp_wallet');
-    } catch (error) {
-      console.error('Error disconnecting wallet:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+  const disconnect = () => {
+    setWallet(null);
+    localStorage.removeItem('icp_wallet');
   };
-
-  if (!isClient) return null; // Prevent rendering of the component until the client-side code runs
 
   return (
     <WalletContext.Provider value={{ wallet, isLoading, connect, disconnect }}>
@@ -134,4 +108,5 @@ export const WalletProvider = ({ children }) => {
     </WalletContext.Provider>
   );
 };
+
 
