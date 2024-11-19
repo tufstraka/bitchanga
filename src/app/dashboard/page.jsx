@@ -9,7 +9,6 @@ import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { NotificationToast } from '@/components/ui/NotificationToast';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AuthClient } from '@dfinity/auth-client';
 
 export default function Platform() {
   const [isConnected, setIsConnected] = useState(false);

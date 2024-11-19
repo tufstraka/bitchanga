@@ -6,7 +6,7 @@ function RoleSelection() {
       <div className="max-w-4xl w-full space-y-8">
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">Welcome to LaunchPad</h1>
-          <p className="text-xl text-gray-600">Tell us who you are, and let's get started</p>
+          <p className="text-xl text-gray-600">Tell us who you are, and let&apos;s get started</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -16,7 +16,7 @@ function RoleSelection() {
                 <div className="p-4 bg-purple-100 rounded-full group-hover:bg-purple-200 transition-colors">
                   <Lightbulb className="w-12 h-12 text-purple-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">I'm a Builder</h2>
+                <h2 className="text-2xl font-bold text-gray-900">I&apos;m a Builder</h2>
                 <p className="text-center text-gray-600">
                   Have a groundbreaking idea? Ready to bring your vision to life? Join as a builder and connect with potential investors.
                 </p>
@@ -35,7 +35,7 @@ function RoleSelection() {
                 <div className="p-4 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
                   <LineChart className="w-12 h-12 text-blue-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">I'm an Investor</h2>
+                <h2 className="text-2xl font-bold text-gray-900">I&apos;m an Investor</h2>
                 <p className="text-center text-gray-600">
                   Looking for the next big opportunity? Join as an investor to discover innovative projects and support promising founders.
                 </p>
