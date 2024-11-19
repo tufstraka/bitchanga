@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, Rocket, Target, Coins, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation'; 
+
 
 const BuilderOnboarding = () => {
   const [step, setStep] = useState(1);
@@ -13,6 +15,7 @@ const BuilderOnboarding = () => {
     teamSize: '1',
     stage: 'concept'
   });
+  const router = useRouter()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +46,12 @@ const BuilderOnboarding = () => {
       />
     </div>
   );
+
+  const handleSubmit = () => {
+    console.log("Submit", formData);
+    //To DO: Send data to MongoDB
+    router.push('/connect-wallet-builder');
+  }
 
   const renderStep1 = () => (
     <div className="space-y-6">
@@ -250,7 +259,7 @@ const BuilderOnboarding = () => {
             </button>
 
             <button
-              onClick={() => step === 3 ? console.log('Submit:', formData) : setStep(s => s + 1)}
+              onClick={() => step === 3 ? handleSubmit() : setStep(s => s + 1)}
               disabled={!isStepValid()}
               className={`flex items-center space-x-2 px-6 py-2 rounded-lg ${
                 isStepValid()
