@@ -1,63 +1,18 @@
-// middleware/auth.js
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
+import { User } from '../models/User.js';
 
-function authenticateToken(req, res, next) {
-  const token = req.header('Authorization')?.split(' ')[1];
-  if (!token) return res.status(403).json({ error: 'Access denied' });
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
-    req.user = user;  // Save user info to request object
+export const auth = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ _id: decoded._id });
+    
+    if (!user) throw new Error();
+    
+    req.token = token;
+    req.user = user;
     next();
-  });
-}
-
-// Middleware to check if the user is a Builder
-function requireBuilder(req, res, next) {
-  if (req.user.role !== 'Builder') {
-    return res.status(403).json({ error: 'Access restricted to Builders only.' });
+  } catch (error) {
+    res.status(401).json({ message: 'Please authenticate' });
   }
-  next();
-}
-
-// Middleware to check if the user is an Investor
-function requireInvestor(req, res, next) {
-  if (req.user.role !== 'Investor') {
-    return res.status(403).json({ error: 'Access restricted to Investors only.' });
-  }
-  next();
-}
-
-module.exports = { authenticateToken, requireBuilder, requireInvestor };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // middleware/auth.js
-// const jwt = require('jsonwebtoken');
-
-// function authenticateToken(req, res, next) {
-//   const token = req.header('Authorization')?.split(' ')[1];
-  
-//   if (!token) return res.status(403).json({ error: 'Access denied' });
-
-//   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-//     if (err) return res.status(403).json({ error: 'Invalid token' });
-//     req.userId = user.userId;
-//     next();
-//   });
-// }
-
-// module.exports = authenticateToken;
+};

@@ -1,13 +1,20 @@
-// models/Project.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const ProjectSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+const projectSchema = new mongoose.Schema({
+  title: { type: String, required: true },
   description: { type: String, required: true },
-  amountRequested: { type: Number, required: true },
-  investedAmount: { type: Number, default: 0 },
-  walletId: String,
-  investors: [{ userId: String, amount: Number }],
+  targetAmount: { type: Number, required: true },
+  currentAmount: { type: Number, default: 0 },
+  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  status: {
+    type: String,
+    enum: ['active', 'funded', 'completed', 'cancelled'],
+    default: 'active'
+  },
+  walletAddress: { type: String, required: true },
+  deadline: { type: Date, required: true },
+  category: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Project', ProjectSchema);
+export const Project = mongoose.model('Project', projectSchema);
