@@ -1,6 +1,5 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { WalletProvider } from '../../contexts/WalletContext';
 import { 
   BarChart3, Users, Target, Calendar, Settings, HelpCircle,
   Bell, Search, TrendingUp, DollarSign, AlertCircle,
@@ -11,10 +10,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { useWallet } from '../../contexts/WalletContext';
-import useCkBtcLedger from '../../contexts/UseCkBTCLedger';
-import { useBalance } from "@nfid/identitykit/react"
-import { useAgent } from "@nfid/identitykit/react"
+import { useIdentityKit, useAgent } from '@nfid/identitykit/react';
+import { idlFactory } from '@/declarations/icrc_1_ledger/icrc_1.did';
+import { Actor } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 
 
 const projectsData = [
@@ -69,17 +68,21 @@ const fundingHistory = [
 ];
 
 
-const DashboardWithProvider = () => {
-  return (
-    <WalletProvider>
-      <BuilderDashboard />
-    </WalletProvider>
-  );
-};
-
 const BuilderDashboard = () => {
-  const { wallet, connect, disconnect, isLoading: isWalletLoading } = useWallet();
-  const { initializeLedger, ledgerCanister, fetchMetadata, fetchBalance, metadata, balance, ledger } = useCkBtcLedger();
+  const {
+    isInitializing,
+    user,
+    isUserConnecting,
+    icpBalance,
+    signer,
+    identity,
+    delegationType,
+    accounts,
+    connect,
+    disconnect,
+    fetchIcpBalance,
+  } = useIdentityKit()  
+  const [balance, setBalance] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [showWalletDetails, setShowWalletDetails] = useState(false);
@@ -92,8 +95,12 @@ const BuilderDashboard = () => {
     sortBy: 'progress'
   });
   const [showFilters, setShowFilters] = useState(false);
+  const agent = useAgent();
 
-  const connectPlugWallet = async () => {
+  const canisterId = process.env.NEXT_PUBLIC_CKBTC_LEDGER_CANISTER_ID;
+
+
+  const connectWallet = async () => {
     try {
       setError(null);
       setIsLoading(true);
@@ -104,9 +111,6 @@ const BuilderDashboard = () => {
 
       await connect();
 
-      //const ledger = initializeLedger();
-      
-      //await fetchBalance(ledger);
     } catch (err) {
       console.error('Failed to connect wallet:', err);
       setError(err.message || 'Failed to connect wallet');
@@ -115,15 +119,68 @@ const BuilderDashboard = () => {
     }
   };
 
+    useEffect(() => {
+    const init = async () => {
+      try {
+        await connect(); 
+        await fetchCkBTCBalance(); // Ensure `fetchCkBTCBalance` is defined
+
+
+      } catch (error) {
+        console.error('Error initializing:', error);
+      }
+    };
+
+    init();
+  }, []); 
+
+  useEffect(() => {
+    console.log('user', user); // Ensure `user` is defined
+    console.log('identity', identity); // Ensure `identity` is defined
+    console.log('agent', agent);
+  }, []);
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
   };
 
- /* useEffect(() => {
-    if (wallet?.principalId) {
-    connectPlugWallet()
+  const fetchCkBTCBalance = async () => {
+    try {
+      // Validation checks
+      if (!agent) {
+        throw new Error('Not authenticated. Please connect to proceed.');
+      }
+      if (!canisterId) {
+        throw new Error('Canister ID is not provided.');
+      }
+      if (!identity) {
+        throw new Error('Identity is not available.');
+      }
+  
+      // Create an actor instance
+      const actorInstance = Actor.createActor(idlFactory, {
+        agent,
+        canisterId: Principal.fromText(canisterId),
+      });
+  
+      // Define the account
+      const account = {
+        owner: Principal.from(user.principal).toText(),
+        subaccount: null, // Replace with a Uint8Array if you have subaccount details
+      };
+  
+      // Fetch the balance
+      const balance = await actorInstance.icrc1_balance_of(account);
+  
+      // Handle successful response
+      setBalance(balance.toString());
+    } catch (err) {
+      // Log and set the error
+      console.error('Error in fetchCkBTCBalance:', err);
+      setError(err.message || 'An error occurred while fetching the balance.');
     }
-  }, [wallet?.principalId]);*/
+  };
+
 
   const handleDisconnect = async () => {
     try {
@@ -136,10 +193,11 @@ const BuilderDashboard = () => {
     }
   };
 
+
   
   const renderConnectButton = () => (
     <button
-      onClick={connectPlugWallet}
+      onClick={connectWallet}
       disabled={isLoading || isWalletLoading}
       className="bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700 disabled:opacity-50"
     >
@@ -160,8 +218,8 @@ const BuilderDashboard = () => {
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="text-sm text-gray-500 mb-1">Connection Status</div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${wallet?.connected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-sm">{wallet?.connected ? 'Connected' : 'Disconnected'}</span>
+            <div className={`w-2 h-2 rounded-full ${identity ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-sm">{identity ? 'Connected' : 'Disconnected'}</span>
           </div>
         </div>
 
@@ -169,14 +227,14 @@ const BuilderDashboard = () => {
           <div className="text-sm text-gray-500 mb-1">Principal ID</div>
           <div className="flex items-center justify-between">
             <div className="font-mono text-sm">
-              {wallet?.principalId ? 
-                `${wallet.principalId.slice(0, 6)}...${wallet.principalId.slice(-4)}` :
+              {identity ? 
+                `${identity.getPrincipal().toString().slice(0, 6)}...${identity.getPrincipal().toString().slice(-4)}` :
                 'Not connected'
               }
             </div>
-            {wallet?.principalId && (
+            {identity && (
               <button 
-                onClick={() => copyToClipboard(wallet.principalId)}
+                onClick={() => copyToClipboard(identity.getPrincipal().toString())}
                 className="p-1 hover:bg-gray-200 rounded"
               >
                 <Copy className="w-4 h-4" />
@@ -194,8 +252,8 @@ const BuilderDashboard = () => {
                balance !== null ? `${balance} ckBTC` : 'N/A'}
             </div>
             <button 
-              onClick={fetchBalance}
-              disabled={isLoading || !wallet?.principalId}
+              onClick={fetchCkBTCBalance}
+              disabled={isLoading || !identity}
               className={`p-1 hover:bg-gray-200 rounded ${isLoading ? 'animate-spin' : ''}`}
             >
               <RefreshCw className="w-4 h-4" />
@@ -204,7 +262,7 @@ const BuilderDashboard = () => {
         </div>
 
         <div className="flex space-x-2">
-          {wallet?.principalId ? (
+          {identity ? (
             <button 
               onClick={handleDisconnect}
               className="flex-1 bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700"
@@ -212,7 +270,13 @@ const BuilderDashboard = () => {
               Disconnect
             </button>
           ) : (
-            renderConnectButton()
+            <button
+              onClick={connectWallet}
+              disabled={isLoading || isUserConnecting}
+              className="bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700 disabled:opacity-50"
+            >
+              {isLoading || isUserConnecting ? 'Connecting...' : 'Connect Wallet'}
+            </button>
           )}
         </div>
 
@@ -426,7 +490,7 @@ const BuilderDashboard = () => {
                  balance !== null ? `${balance} ckBTC` : 'Not connected'}
               </span>
               {/*<button 
-                onClick={fetchBalance}
+                onClick={fetchCkBTCBalance}
                 disabled={isLoading || !wallet?.principalId}
                 className={`p-1 hover:bg-purple-100 rounded ${isLoading ? 'animate-spin' : ''}`}
               >
@@ -440,21 +504,21 @@ const BuilderDashboard = () => {
             </button>
 
             <div className="relative">
-              {wallet?.principalId ? (
+              {identity ? (
                 <button 
                   onClick={() => setShowWalletDetails(!showWalletDetails)}
                   className="flex items-center space-x-2 hover:bg-gray-100 rounded-lg px-2 py-1"
                 >
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-purple-600">
-                      {wallet.principalId.slice(0, 2)}
+                      {identity.getPrincipal().toString().slice(0, 6)}
                     </span>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
               ) : (
                 <button
-                  onClick={connectPlugWallet}
+                  onClick={connectWallet}
                   className="bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700"
                 >
                   Connect Wallet
@@ -706,4 +770,4 @@ const BuilderDashboard = () => {
   );
 };
 
-export default DashboardWithProvider;
+export default BuilderDashboard;

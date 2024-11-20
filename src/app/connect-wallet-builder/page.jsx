@@ -9,7 +9,8 @@ import { idlFactory } from '@/declarations/crowdfunding_platform/bitchanga_backe
 import { Principal } from '@dfinity/principal';
 import { useIdentityKit, useAgent } from '@nfid/identitykit/react';
 import { motion } from 'framer-motion';
-import { useBalance } from "@nfid/identitykit/react"
+import { useBalance } from "@nfid/identitykit/react";
+
 
 const CustomConnectWallet = () => {
   const { connect } = useIdentityKit();
@@ -39,7 +40,7 @@ const CustomConnectWallet = () => {
         font-semibold"
       >
         <Wallet className="w-6 h-6" />
-        <span>Connect with Internet Identity</span>
+        <span>Connect with Internet Computer</span>
       </motion.button>
 
       <div className="text-center">
