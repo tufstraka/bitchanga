@@ -1,4 +1,4 @@
-import { IcrcLedgerCanister } from "@dfinity/ledger";
+//import { IcrcLedgerCanister } from "@dfinity/ledger";
 import { useCallback, useEffect, useState } from "react";
 import { Principal } from "@dfinity/principal";
 import { useWallet } from "./WalletContext";

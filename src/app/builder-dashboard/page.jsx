@@ -13,6 +13,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useWallet } from '../../contexts/WalletContext';
 import useCkBtcLedger from '../../contexts/UseCkBTCLedger';
+import { useBalance } from "@nfid/identitykit/react"
+import { useAgent } from "@nfid/identitykit/react"
+
 
 const projectsData = [
   { 

@@ -1,11 +1,16 @@
-//import Image from "next/image";
-//import CkBTCMinter from "./components/CkBTCMinter";
-import LandingPage from "./pages/landingpage";
+'use client';
+
+import dynamic from 'next/dynamic';
+
+// Dynamically import the LandingPage component with no SSR
+const LandingPage = dynamic(() => import("./pages/landingpage"), {
+  ssr: false
+});
 
 export default function Home() {
   return (
-    <div >
-      <LandingPage/>
-    </div>
+    <main>     
+        <LandingPage />
+    </main>
   );
 }
