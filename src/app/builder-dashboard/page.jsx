@@ -121,22 +121,25 @@ const BuilderDashboard = () => {
 
     useEffect(() => {
     const init = async () => {
-      try {
-        await connect(); 
-        await fetchCkBTCBalance(); // Ensure `fetchCkBTCBalance` is defined
+      if (isInitializing) return;
+      
+      if (!user) {
+        try {
+          await connect(); 
+          await fetchCkBTCBalance(); 
 
-
-      } catch (error) {
-        console.error('Error initializing:', error);
-      }
+        } catch (error) {
+          console.error('Error initializing:', error);
+        }
+    }
     };
 
     init();
   }, []); 
 
   useEffect(() => {
-    console.log('user', user); // Ensure `user` is defined
-    console.log('identity', identity); // Ensure `identity` is defined
+    console.log('user', user); 
+    console.log('identity', identity); 
     console.log('agent', agent);
   }, []);
 
@@ -146,7 +149,6 @@ const BuilderDashboard = () => {
 
   const fetchCkBTCBalance = async () => {
     try {
-      // Validation checks
       if (!agent) {
         throw new Error('Not authenticated. Please connect to proceed.');
       }
@@ -156,26 +158,21 @@ const BuilderDashboard = () => {
       if (!identity) {
         throw new Error('Identity is not available.');
       }
-  
-      // Create an actor instance
+
       const actorInstance = Actor.createActor(idlFactory, {
         agent,
         canisterId: Principal.fromText(canisterId),
       });
   
-      // Define the account
       const account = {
         owner: Principal.from(user.principal).toText(),
-        subaccount: null, // Replace with a Uint8Array if you have subaccount details
+        subaccount: null, 
       };
   
-      // Fetch the balance
       const balance = await actorInstance.icrc1_balance_of(account);
   
-      // Handle successful response
       setBalance(balance.toString());
     } catch (err) {
-      // Log and set the error
       console.error('Error in fetchCkBTCBalance:', err);
       setError(err.message || 'An error occurred while fetching the balance.');
     }
