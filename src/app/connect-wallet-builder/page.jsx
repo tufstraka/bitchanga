@@ -83,6 +83,8 @@ const WalletConnect = () => {
     try {
       await fetchBalance();
       console.log('balance', balance)
+      console.log('agent', agent)
+      
       if (!agent) throw new Error('Not authenticated. Please connect to proceed.');
       if (!canisterId) throw new Error('Canister ID is not provided.');
 
@@ -92,7 +94,11 @@ const WalletConnect = () => {
       });
 
       const fee = await actorInstance.getRegistrationFee();
+
+      console.log('fee', fee);
       const result = await actorInstance.register();
+
+      console.log('result', result);
 
       //router.push('/builder-dashboard');
     } catch (err) {
