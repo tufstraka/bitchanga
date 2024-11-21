@@ -499,13 +499,13 @@ const BuilderDashboard = () => {
                  error ? 'Error' :
                  balance !== null ? `${balance} ckBTC` : 'Not connected'}
               </span>
-              {/*<button 
+              <button 
                 onClick={fetchCkBTCBalance}
-                disabled={isLoading || !wallet?.principalId}
+                disabled={isConnecting}
                 className={`p-1 hover:bg-purple-100 rounded ${isLoading ? 'animate-spin' : ''}`}
               >
                 <RefreshCw className="w-4 h-4 text-purple-600" />
-              </button>*/}
+              </button>
             </div>
 
             <button className="p-2 hover:bg-gray-100 rounded-full relative">
@@ -514,7 +514,7 @@ const BuilderDashboard = () => {
             </button>
 
             <div className="relative">
-              {identity ? (
+              {user ? (
                 <button 
                   onClick={() => setShowWalletDetails(!showWalletDetails)}
                   className="flex items-center space-x-2 hover:bg-gray-100 rounded-lg px-2 py-1"
