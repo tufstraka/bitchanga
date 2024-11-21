@@ -7,13 +7,13 @@ import { useRouter } from 'next/navigation';
 import { Actor } from '@dfinity/agent';
 import { idlFactory } from '@/declarations/crowdfunding_platform/bitchanga_backend.did';
 import { Principal } from '@dfinity/principal';
-import { useIdentityKit, useAgent } from '@nfid/identitykit/react';
+import { useAgent, useAuth, useIdentity } from '@nfid/identitykit/react';
 import { motion } from 'framer-motion';
 import { useBalance } from "@nfid/identitykit/react";
 
 
 const CustomConnectWallet = () => {
-  const { connect } = useIdentityKit();
+  const { connect } = useAuth()
 
   return (
     <motion.div 
@@ -55,19 +55,10 @@ const CustomConnectWallet = () => {
 const WalletConnect = () => {
   const [error, setError] = useState('');
   const [principal, setPrincipal] = useState('');
-  const { balance, fetchBalance } = useBalance()
+  const { balance, fetchBalance } = useBalance();
+  const { connect, disconnect, isConnecting, user } = useAuth()
   const router = useRouter();
-
-  const {
-    isInitializing,
-    isUserConnecting,
-    user,
-    identity,
-    connect,
-    disconnect,
-    isConnecting,
-  } = useIdentityKit();
-
+  const identity = useIdentity();
   const agent = useAgent();
 
   const canisterId = process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID;

@@ -10,7 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { useIdentityKit, useAgent } from '@nfid/identitykit/react';
+import { useAgent, useAuth, useIdentity } from '@nfid/identitykit/react';
 import { idlFactory } from '@/declarations/icrc_1_ledger/icrc_1.did';
 import { Actor } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -69,19 +69,6 @@ const fundingHistory = [
 
 
 const BuilderDashboard = () => {
-  const {
-    isInitializing,
-    user,
-    isUserConnecting,
-    icpBalance,
-    signer,
-    identity,
-    delegationType,
-    accounts,
-    connect,
-    disconnect,
-    fetchIcpBalance,
-  } = useIdentityKit()  
   const [balance, setBalance] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -95,6 +82,10 @@ const BuilderDashboard = () => {
     sortBy: 'progress'
   });
   const [showFilters, setShowFilters] = useState(false);
+  const { connect, disconnect, isConnecting, user } = useAuth();
+  const identity = useIdentity()
+
+
   const agent = useAgent();
 
   const canisterId = process.env.NEXT_PUBLIC_CKBTC_LEDGER_CANISTER_ID;
@@ -121,12 +112,11 @@ const BuilderDashboard = () => {
 
     useEffect(() => {
     const init = async () => {
-      if (isInitializing) return;
+      if (isConnecting) return;
       
       if (!user) {
         try {
           await connect(); 
-          await fetchCkBTCBalance(); 
 
         } catch (error) {
           console.error('Error initializing:', error);
@@ -152,28 +142,51 @@ const BuilderDashboard = () => {
       if (!agent) {
         throw new Error('Not authenticated. Please connect to proceed.');
       }
-      if (!canisterId) {
-        throw new Error('Canister ID is not provided.');
+      if (!canisterId || typeof canisterId !== 'string') {
+        throw new Error('Invalid Canister ID. It must be a string.');
       }
       if (!identity) {
         throw new Error('Identity is not available.');
       }
 
+      let canisterPrincipal, userPrincipal;
+      try {
+        canisterPrincipal = Principal.fromText(canisterId);
+      } catch (error) {
+        console.error('Invalid Canister ID format:', error);
+        throw new Error('Canister ID is invalid.');
+      }
+
+      userPrincipal = user?.principal;
+
+      console.log('user principal:', userPrincipal);
+
+      console.log('canister principal:', canisterPrincipal);
+
+  
       const actorInstance = Actor.createActor(idlFactory, {
         agent,
-        canisterId: Principal.fromText(canisterId),
+        canisterId: canisterPrincipal,
       });
+
+      console.log('actor instance:', actorInstance);
   
       const account = {
-        owner: Principal.from(user.principal).toText(),
-        subaccount: null, 
+        owner: userPrincipal,
+        subaccount: [], 
       };
   
-      const balance = await actorInstance.icrc1_balance_of(account);
-  
-      setBalance(balance.toString());
+      const ckbtbalance = await actorInstance.icrc1_balance_of(account);
+
+      console.log('balance:', balance);
+      setBalance(ckbtbalance?.toString() || '0');
     } catch (err) {
       console.error('Error in fetchCkBTCBalance:', err);
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+      });
       setError(err.message || 'An error occurred while fetching the balance.');
     }
   };
@@ -269,10 +282,10 @@ const BuilderDashboard = () => {
           ) : (
             <button
               onClick={connectWallet}
-              disabled={isLoading || isUserConnecting}
+              disabled={isLoading || isConnecting}
               className="bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700 disabled:opacity-50"
             >
-              {isLoading || isUserConnecting ? 'Connecting...' : 'Connect Wallet'}
+              {isLoading || isConnecting ? 'Connecting...' : 'Connect Wallet'}
             </button>
           )}
         </div>
