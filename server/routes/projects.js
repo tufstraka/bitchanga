@@ -1,35 +1,55 @@
-import express from 'express';
-import { ProjectService } from '../services/projectService.js';
-import { auth } from '../middleware/auth.js';
-import { projectValidationRules, validate } from '../middleware/validators.js';
-
+const express = require('express');
 const router = express.Router();
+const Project = require('../models/Project');
+const { verifyToken } = require('../utils/auth');
 
-router.get('/', async (req, res, next) => {
+// Create project
+router.post('/', verifyToken, async (req, res) => {
   try {
-    const projects = await ProjectService.getAllProjects();
+    const project = new Project({
+      ...req.body,
+      builder: req.user.id
+    });
+    const savedProject = await project.save();
+    res.status(201).json(savedProject);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Get all projects
+router.get('/', async (req, res) => {
+  try {
+    const projects = await Project.find().populate('builder', 'username');
     res.json(projects);
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
-router.post('/', [auth, ...projectValidationRules, validate], async (req, res, next) => {
+// Invest in project
+router.post('/:id/invest', verifyToken, async (req, res) => {
   try {
-    const project = await ProjectService.createProject(req.body, req.user._id);
-    res.status(201).json(project);
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    project.investors.push({
+      user: req.user.id,
+      amount: req.body.amount
+    });
+    project.raisedAmount += req.body.amount;
+    
+    if (project.raisedAmount >= project.targetAmount) {
+      project.status = 'funded';
+    }
+
+    const updatedProject = await project.save();
+    res.json(updatedProject);
   } catch (error) {
-    next(error);
+    res.status(400).json({ message: error.message });
   }
 });
 
-router.get('/:id', async (req, res, next) => {
-  try {
-    const project = await ProjectService.getProjectById(req.params.id);
-    res.json(project);
-  } catch (error) {
-    next(error);
-  }
-});
-
-export { router as projectRoutes };
+module.exports = router;
