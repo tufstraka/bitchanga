@@ -1,40 +1,62 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+/frontend/node_modules
+/frontend/.pnp
+/frontend/.pnp.*
+/frontend/.yarn/*
+!/frontend/.yarn/patches
+!/frontend/.yarn/plugins
+!/frontend/.yarn/releases
+!/frontend/.yarn/versions
+
+/backend/node_modules
+/backend/.pnp
+/backend/.pnp.*
+/backend/.yarn/*
+!/backend/.yarn/patches
+!/backend/.yarn/plugins
+!/backend/.yarn/releases
+!/backend/.yarn/versions
 
 # testing
-/coverage
+/frontend/coverage
+/backend/coverage
 
 # next.js
-/.next/
-/out/
+/frontend/.next/
+/frontend/out/
+/backend/.next/
+/backend/out/
 
 # production
-/build
+/frontend/build
+/backend/build
 
 # misc
-.DS_Store
-*.pem
+/frontend/.DS_Store
+/backend/.DS_Store
+/frontend/*.pem
+/backend/*.pem
 
 # debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/backend/npm-debug.log*
+/backend/yarn-debug.log*
+/backend/yarn-error.log*
 
-# env files (can opt-in for commiting if needed)
-.env*
+# env files (can opt-in for committing if needed)
+/frontend/.env*
+/backend/.env*
 
 # vercel
-.vercel
+/frontend/.vercel
+/backend/.vercel
 
 # typescript
-*.tsbuildinfo
-next-env.d.ts
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+/backend/*.tsbuildinfo
+/backend/next-env.d.ts
