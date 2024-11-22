@@ -15,6 +15,7 @@ const BuilderOnboarding = () => {
   const [formData, setFormData] = useState({
     // Builder Information
     fullName: '',
+    password: '',
     email: '',
     role: '',
     linkedinUrl: '',
@@ -144,6 +145,18 @@ const BuilderOnboarding = () => {
         />
       </div>
 
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Password</label>
+        <input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          placeholder="Enter your password"
+        />
+      </div>
+      
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Role</label>
         <select

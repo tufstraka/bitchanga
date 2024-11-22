@@ -42,7 +42,7 @@ const LandingPage = () => {
             <div className="flex items-center space-x-2">
               <Bitcoin className="h-8 w-8 text-orange-500" />
               <span className="text-2xl font-bold text-slate-900">
-                ChangiaHub
+                Bitchanga
               </span>
             </div>
             

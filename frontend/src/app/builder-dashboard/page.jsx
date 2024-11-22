@@ -394,8 +394,8 @@ const BuilderDashboard = () => {
       <nav className="bg-white border-b px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold text-purple-600">Hey there,</h1>
-            <div className="hidden md:flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2">
+            {/*<h1 className="text-xl font-bold text-purple-600">Hey there,</h1>*/}
+            <div className="hidden md:flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2 mr-4">
               <Search className="w-4 h-4 text-gray-500" />
               <input 
                 type="text" 
