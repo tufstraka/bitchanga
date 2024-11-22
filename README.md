@@ -1,1 +1,85 @@
-## Getting Started
+# Bitchanga - Decentralized Crowdfunding Platform  
+
+Bitchanga is a decentralized crowdfunding platform designed to connect builders and investors through a transparent, secure, and efficient blockchain-based ecosystem. Using **ckBTC** on the **Internet Computer Protocol**, Bitchanga ensures fast, trustless transactions and milestone-driven project funding. 
+
+Whether you're a builder looking to fund your innovative project or an investor seeking exciting opportunities, Bitchanga is the perfect platform for fostering collaboration and growth.
+
+---
+
+## 🌟 Features  
+
+### For Builders  
+- **Global Exposure**: Present your project to a diverse network of investors worldwide.  
+- **Milestone-based Funding**: Funds are released only when predefined milestones are achieved.  
+- **Lower Fees**: Avoid the high costs of traditional financing options.  
+
+### For Investors  
+- **Safe Investments**: Contributions are secured in escrow until project milestones are met.  
+- **Investment Flexibility**: Withdraw funds if you lose confidence in a project.  
+- **Exclusive Rewards**: Earn NFTs based on your investment tier.  
+- **Support Innovation**: Help bring groundbreaking ideas to life while making an impact.  
+
+### Powered by Technology  
+- **On-chain Transactions**: Built on the Internet Computer Protocol for speed and decentralization.  
+- **Off-chain Storage**: MongoDB Atlas is used for efficient storage of non-sensitive data.  
+- **Smart Contracts**: Automation ensures fair and trustless transactions.  
+
+---
+
+## 🚀 Getting Started  
+
+Follow these simple steps to begin your journey on Bitchanga:  
+
+1. **Sign Up**  
+   - Register as a **Builder** or an **Investor**.  
+   - Pay a small platform fee to access exclusive features.  
+
+2. **For Builders**  
+   - Submit your project details, including goals and milestones.  
+   - Showcase your project to attract potential investors.  
+
+3. **For Investors**  
+   - Browse projects and find those that align with your interests.  
+   - Invest ckBTC and receive tier-based NFT rewards.  
+   - Monitor project progress and milestones.  
+
+4. **Escrow System**  
+   - Funds are securely held in escrow until milestones are validated.  
+   - Builders can only access funds after meeting milestones.  
+   - Investors can withdraw contributions before milestones are met if needed.  
+
+---
+
+## 💡 Why ckBTC?  
+
+- **Fast and Reliable**: Instant settlements without intermediaries.  
+- **Decentralized**: Transactions are transparent and verifiable on the blockchain.  
+- **Global Reach**: Easily invest or fund projects across borders.  
+
+---
+
+## 🔐 Security and Transparency  
+
+Bitchanga ensures a secure and trustworthy crowdfunding environment:  
+- **Smart Contract Escrow**: Funds are released only when milestones are achieved.  
+- **NFT Rewards**: Recognizing investors' contributions with unique digital assets.  
+- **Transparent Operations**: All transactions and progress are recorded on the blockchain.  
+
+---
+
+## 🌍 Transforming Crowdfunding  
+
+Bitchanga is redefining how projects are funded and supported globally. Join us and be part of a decentralized, transparent, and inclusive ecosystem.
+
+👉 **Visit [Bitchanga](#)**  
+👉 **Start Building or Investing Today!**  
+
+---
+
+**Built with:**  
+- **ckBTC** on the Internet Computer Protocol  
+- **MongoDB Atlas** for off-chain data storage  
+- **Smart Contracts** for secure, automated fund management and on chain data storage. 
+
+**Join the movement. Join Bitchanga.**  
+
