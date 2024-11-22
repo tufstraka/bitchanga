@@ -14,6 +14,7 @@ import Blob "mo:base/Blob";
 import Hash "mo:base/Hash";
 import Debug "mo:base/Debug";
 
+
 actor class CrowdfundingRegistration() {
     // Types
     type RegistrationError = {
@@ -104,6 +105,10 @@ actor class CrowdfundingRegistration() {
     private var registeredUsers = HashMap.HashMap<Principal, UserRegistration>(10, Principal.equal, Principal.hash);
     private var projectFundings = HashMap.HashMap<Nat, ProjectFunding>(10, Nat.equal, Hash.hash);
     private let ckbtc : ICRC1_Actor = actor(Principal.toText(CKBTC_CANISTER_ID));
+
+
+
+
 
     // NFID Integration
     public shared query func icrc28_trusted_origins() : async { trusted_origins : [Text] } {
@@ -196,6 +201,8 @@ actor class CrowdfundingRegistration() {
         if (not validateProjectDuration(durationInDays)) {
             return #err(#InvalidAmount);
         };
+
+        //To Do: Fix this logic
 
         let deadline = Time.now() + (durationInDays * 24 * 60 * 60 * 1_000_000_000);
         let randomBytes = await Random.blob();
@@ -291,6 +298,7 @@ actor class CrowdfundingRegistration() {
         };
     };
 
+    //To Do: Refactor this function
     public shared({ caller }) func withdrawContribution(projectId : Nat) : async Result.Result<(), RegistrationError> {
         switch (projectFundings.get(projectId)) {
             case (null) { return #err(#ProjectNotFound); };
