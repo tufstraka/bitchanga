@@ -1,12 +1,25 @@
-"use client";
+'use client'
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, Rocket, Target, Coins, Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation'; 
-
+import { ArrowLeft, ArrowRight, Building2, Rocket, Target, UserCircle, Upload } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Actor } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
+import { idlFactory } from '@/declarations/crowdfunding_platform/bitchanga_backend.did';
+import { useAgent } from '@nfid/identitykit/react';
+import { useRouter } from 'next/navigation';
+import { authService } from '@/services/api';
+import { projectService } from '@/services/api';
 
 const BuilderOnboarding = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Builder Information
+    fullName: '',
+    email: '',
+    role: '',
+    linkedinUrl: '',
+    experience: '',
+    // Project Information
     projectName: '',
     category: '',
     targetAmount: '',
@@ -15,7 +28,12 @@ const BuilderOnboarding = () => {
     teamSize: '1',
     stage: 'concept'
   });
-  const router = useRouter()
+  
+  const router = useRouter();
+  const agent = useAgent();
+
+  const canisterId = process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID;
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,10 +46,12 @@ const BuilderOnboarding = () => {
   const isStepValid = () => {
     switch(step) {
       case 1:
-        return formData.projectName && formData.category;
+        return formData.fullName && formData.email && formData.role;
       case 2:
-        return formData.targetAmount && formData.timeline;
+        return formData.projectName && formData.category;
       case 3:
+        return formData.targetAmount && formData.timeline;
+      case 4:
         return formData.pitch.length >= 100;
       default:
         return true;
@@ -42,18 +62,140 @@ const BuilderOnboarding = () => {
     <div className="w-full bg-gray-100 h-2 rounded-full mb-8">
       <div 
         className="bg-purple-600 h-2 rounded-full transition-all duration-500"
-        style={{ width: `${(step / 3) * 100}%` }}
+        style={{ width: `${(step / 4) * 100}%` }}
       />
     </div>
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     console.log("Submit", formData);
-    //To DO: Send data to MongoDB
-    router.push('/connect-wallet-builder');
-  }
+
+    try {
+      if (!agent) throw new Error('Not authenticated. Please connect to proceed.');
+      if (!canisterId) throw new Error('Canister ID is not provided.');
+
+      const actorInstance = Actor.createActor(idlFactory, {
+        agent,
+        canisterId: Principal.fromText(canisterId),
+      });
+
+      const projectID = await actorInstance.createFundingProject();
+      console.log('projectID', projectID);
+
+          /* TODO: Send data to MongoDB
+    const userData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      role: formData.role,
+      linkedinUrl: formData.linkedinUrl,
+      experience: formData.experience,
+    };
+
+    const userResponse = await authService.register(userData);
+
+    const projectData = {
+      projectName: formData.projectName,
+      category: formData.category,
+      stage: formData.stage,
+      targetAmount: formData.targetAmount,
+      timeline: formData.timeline,
+      teamSize: formData.teamSize,
+      pitch: formData.pitch,
+    };
+
+    const projectResponse = await projectService.createProject(projectData);*/
+
+    toast.success('Thanks for submitting your project! We will review it and get back to you soon.');
+
+    //router.push('/connect-wallet-builder');
+
+
+
+    } catch (err) {
+      console.error('Error in DashboardProceed:', err);
+      setError(err.message || 'An error occurred during the registration process.');
+    }
+
+  };
 
   const renderStep1 = () => (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Full Name</label>
+        <input
+          type="text"
+          name="fullName"
+          value={formData.fullName}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          placeholder="Enter your full name"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Email Address</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          placeholder="Enter your email address"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Role</label>
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        >
+          <option value="">Select your role</option>
+          <option value="founder">Founder</option>
+          <option value="cto">CTO</option>
+          <option value="developer">Developer</option>
+          <option value="product_manager">Product Manager</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">LinkedIn Profile (Optional)</label>
+        <input
+          type="url"
+          name="linkedinUrl"
+          value={formData.linkedinUrl}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          placeholder="https://linkedin.com/in/yourprofile"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
+        <div className="flex space-x-4">
+          {['0-2', '3-5', '6-10', '10+'].map((years) => (
+            <button
+              key={years}
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, experience: years }))}
+              className={`px-4 py-2 border rounded-lg transition-all ${
+                formData.experience === years 
+                  ? 'border-purple-500 bg-purple-50 text-purple-700' 
+                  : 'border-gray-200 hover:border-purple-200'
+              }`}
+            >
+              {years} years
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
     <div className="space-y-6">
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Project Name</label>
@@ -106,7 +248,7 @@ const BuilderOnboarding = () => {
     </div>
   );
 
-  const renderStep2 = () => (
+  const renderStep3 = () => (
     <div className="space-y-6">
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Funding Target</label>
@@ -162,7 +304,7 @@ const BuilderOnboarding = () => {
     </div>
   );
 
-  const renderStep3 = () => (
+  const renderStep4 = () => (
     <div className="space-y-6">
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Project Pitch</label>
@@ -196,22 +338,28 @@ const BuilderOnboarding = () => {
 
   const steps = [
     {
+      icon: UserCircle,
+      title: "About You",
+      subtitle: "Tell us about yourself",
+      content: renderStep1()
+    },
+    {
       icon: Building2,
       title: "Project Basics",
       subtitle: "Let's start with the fundamentals",
-      content: renderStep1()
+      content: renderStep2()
     },
     {
       icon: Target,
       title: "Funding Details",
       subtitle: "Set your funding goals and timeline",
-      content: renderStep2()
+      content: renderStep3()
     },
     {
       icon: Rocket,
       title: "Project Pitch",
       subtitle: "Tell investors about your vision",
-      content: renderStep3()
+      content: renderStep4()
     }
   ];
 
@@ -221,7 +369,7 @@ const BuilderOnboarding = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Create Your Project</h1>
-          <p className="mt-2 text-gray-600">Complete your project profile to connect with investors</p>
+          <p className="mt-2 text-gray-600">Complete your profile to connect with investors</p>
         </div>
 
         {/* Progress Bar */}
@@ -259,7 +407,7 @@ const BuilderOnboarding = () => {
             </button>
 
             <button
-              onClick={() => step === 3 ? handleSubmit() : setStep(s => s + 1)}
+              onClick={() => step === 4 ? handleSubmit() : setStep(s => s + 1)}
               disabled={!isStepValid()}
               className={`flex items-center space-x-2 px-6 py-2 rounded-lg ${
                 isStepValid()
@@ -267,7 +415,7 @@ const BuilderOnboarding = () => {
                   : 'bg-purple-200 text-purple-400 cursor-not-allowed'
               }`}
             >
-              <span>{step === 3 ? 'Submit' : 'Next'}</span>
+              <span>{step === 4 ? 'Submit' : 'Next'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

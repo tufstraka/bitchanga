@@ -9,14 +9,13 @@ import { idlFactory } from '@/declarations/crowdfunding_platform/bitchanga_backe
 import { Principal } from '@dfinity/principal';
 import { useAgent, useAuth, useIdentity } from '@nfid/identitykit/react';
 import { motion } from 'framer-motion';
-import { useBalance } from "@nfid/identitykit/react";
-
+import { walletService } from '@/services/api';
 
 const CustomConnectWallet = () => {
-  const { connect } = useAuth()
+  const { connect } = useAuth();
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -29,7 +28,7 @@ const CustomConnectWallet = () => {
       </div>
       
       <motion.button
-        onClick={() => connect()}
+        onClick={async () => { await connect(); }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="w-full flex items-center justify-center space-x-3 
@@ -55,8 +54,7 @@ const CustomConnectWallet = () => {
 const WalletConnect = () => {
   const [error, setError] = useState('');
   const [principal, setPrincipal] = useState('');
-  const { balance, fetchBalance } = useBalance();
-  const { connect, disconnect, isConnecting, user } = useAuth()
+  const { disconnect, isConnecting, user } = useAuth();
   const router = useRouter();
   const identity = useIdentity();
   const agent = useAgent();
@@ -67,15 +65,14 @@ const WalletConnect = () => {
     if (identity) {
       const principalId = identity.getPrincipal().toText();
       setPrincipal(principalId);
+
+      console.log('identity', identity);
+      console.log('user', user?.principal);
     }
   }, [identity]);
 
   const DashboardProceed = async () => {
     try {
-      await fetchBalance();
-      console.log('balance', balance)
-      console.log('agent', agent)
-      
       if (!agent) throw new Error('Not authenticated. Please connect to proceed.');
       if (!canisterId) throw new Error('Canister ID is not provided.');
 
@@ -84,11 +81,13 @@ const WalletConnect = () => {
         canisterId: Principal.fromText(canisterId),
       });
 
-      const fee = await actorInstance.getRegistrationFee();
+      //const fee = await actorInstance.getRegistrationFee();
 
-      console.log('fee', fee);
-      const result = await actorInstance.register();
+      const savedwallet = await walletService.connectWallet(Principal.from(user?.principal || '').toText());
 
+      console.log('savedwallet', savedwallet);
+
+      //const result = await actorInstance.register();
       console.log('result', result);
 
       //router.push('/builder-dashboard');
@@ -119,7 +118,7 @@ const WalletConnect = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Identity Connected</h2>
         <p className="text-sm text-gray-500 mb-4 break-all">
-          Principal ID: {Principal.from(user.principal).toText()}
+          Principal ID: {Principal.from(user?.principal || '').toText()}
         </p>
       </div>
 

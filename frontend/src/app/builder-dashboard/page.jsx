@@ -10,6 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import  ProjectCard  from '@/components/ProjectCard';
 import { useAgent, useAuth, useIdentity } from '@nfid/identitykit/react';
 import { idlFactory } from '@/declarations/icrc_1_ledger/icrc_1.did';
 import { Actor } from '@dfinity/agent';
@@ -177,8 +178,6 @@ const BuilderDashboard = () => {
       };
   
       const ckbtbalance = await actorInstance.icrc1_balance_of(account);
-
-      console.log('balance:', balance);
       setBalance(ckbtbalance?.toString() || '0');
     } catch (err) {
       console.error('Error in fetchCkBTCBalance:', err);
@@ -203,17 +202,6 @@ const BuilderDashboard = () => {
     }
   };
 
-
-  
-  const renderConnectButton = () => (
-    <button
-      onClick={connectWallet}
-      disabled={isLoading || isWalletLoading}
-      className="bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700 disabled:opacity-50"
-    >
-      {isLoading || isWalletLoading ? 'Connecting...' : 'Connect Plug Wallet'}
-    </button>
-  );
 
   const WalletDetails = () => (
     <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border p-4 z-50">
@@ -398,80 +386,7 @@ const BuilderDashboard = () => {
     </div>
   );
 
-  const ProjectCard = ({ project }) => {
-    const [showDetails, setShowDetails] = useState(false);
 
-    return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h3 className="font-semibold text-lg mb-1">{project.title}</h3>
-              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                <div className="flex items-center space-x-1">
-                  <Users className="w-4 h-4" />
-                  <span>{project.backers} backers</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{project.daysLeft} days left</span>
-                </div>
-                <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full text-xs">
-                  {project.category}
-                </span>
-              </div>
-            </div>
-            <button 
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors"
-              onClick={() => setShowDetails(!showDetails)}
-            >
-              {showDetails ? 'Hide Details' : 'Fund Project'}
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Raised: {project.raised} ckBTC</span>
-              <span className="font-medium">{project.progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${project.progress}%` }}
-              />
-            </div>
-            <div className="text-sm text-gray-600">
-              Goal: {project.goal} ckBTC
-            </div>
-          </div>
-
-          {showDetails && (
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-gray-600 mb-3">{project.description}</p>
-              <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag, index) => (
-                  <span 
-                    key={index}
-                    className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-4 flex gap-2">
-                <button className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors">
-                  Back Project
-                </button>
-                <button className="px-4 py-2 border border-purple-600 text-purple-600 rounded-lg text-sm hover:bg-purple-50 transition-colors">
-                  Share
-                </button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -540,7 +455,6 @@ const BuilderDashboard = () => {
         </div>
       </nav>
 
-      {/* Main content structure remains the same... */}
  <Sidebar />
 
       <div 
