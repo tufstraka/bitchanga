@@ -67,7 +67,7 @@ const LandingPage = () => {
             {['Dashboard', 'Projects', 'Launch'].map((item) => (
               <Link
                 key={item}
-                href="#"
+                href="/roleselection"
                 className="relative group text-gray-300 hover:text-white transition-colors"
               >
                 {item}

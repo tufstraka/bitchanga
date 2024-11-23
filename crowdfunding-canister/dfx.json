@@ -3,16 +3,6 @@
     "crowdfunding_registration": {
       "main": "src/crowdfunding_registration/main.mo",
       "type": "motoko"
-    },
-    "_bitchanga_frontend": {
-      "dependencies": [
-        "bitchanga_backend"
-      ],
-      "source": [
-        "src/bitchanga_frontend/dist"
-      ],
-      "type": "assets",
-      "workspace": "bitchanga_frontend"
     }
   },
   "defaults": {

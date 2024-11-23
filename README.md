@@ -1,8 +1,10 @@
-# Bitchanga - Decentralized Crowdfunding Platform  
+# Bitchanga - Decentralized crowdfunding platform  
 
-Bitchanga is a decentralized crowdfunding platform designed to connect builders and investors through a transparent, secure, and efficient blockchain-based ecosystem. Using **ckBTC** on the **Internet Computer Protocol**, Bitchanga ensures fast, trustless transactions and milestone-driven project funding. 
+Tired of traditional crowdfunding platforms with their high fees and lack of transparency? Meet Bitchanga - where builders and investors connect directly through the power of blockchain. We're leveraging ckBTC on the Internet Computer Protocol to make project funding faster, safer, and more transparent than ever before.
 
-Whether you're a builder looking to fund your innovative project or an investor seeking exciting opportunities, Bitchanga is the perfect platform for fostering collaboration and growth.
+# What makes us different
+
+Ever tried raising funds for your project only to get lost in a sea of paperwork and intermediaries? Or invested in a project only to wonder where your money really went? We get it. That's why we built Bitchanga with both builders and investors in mind.
 
 ---
 
@@ -32,7 +34,6 @@ Follow these simple steps to begin your journey on Bitchanga:
 
 1. **Sign Up**  
    - Register as a **Builder** or an **Investor**.  
-   - Pay a small platform fee to access exclusive features.  
 
 2. **For Builders**  
    - Submit your project details, including goals and milestones.  
@@ -72,14 +73,13 @@ Bitchanga ensures a secure and trustworthy crowdfunding environment:
 Bitchanga is redefining how projects are funded and supported globally. Join us and be part of a decentralized, transparent, and inclusive ecosystem.
 
 👉 **Visit [Bitchanga](#)**  
-👉 **Start Building or Investing Today!**  
 
 ---
 
-**Built with:**  
+**Built on:**  
 - **ckBTC** on the Internet Computer Protocol  
-- **MongoDB Atlas** for off-chain data storage  
-- **Smart Contracts** for secure, automated fund management and on chain data storage. 
+- **MongoDB** for off-chain data storage  
+- **ICP canisters** for secure, automated fund management and on chain data storage. 
 
-**Join the movement. Join Bitchanga.**  
+**Built with ❤️ by the Bitchanga team**  
 

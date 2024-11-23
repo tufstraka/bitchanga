@@ -10,53 +10,53 @@
 !/frontend/.yarn/releases
 !/frontend/.yarn/versions
 
-/backend/node_modules
-/backend/.pnp
-/backend/.pnp.*
-/backend/.yarn/*
-!/backend/.yarn/patches
-!/backend/.yarn/plugins
-!/backend/.yarn/releases
-!/backend/.yarn/versions
+/backend(off-chain)/node_modules
+/backend(off-chain)/.pnp
+/backend(off-chain)/.pnp.*
+/backend(off-chain)/.yarn/*
+!/backend(off-chain)/.yarn/patches
+!/backend(off-chain)/.yarn/plugins
+!/backend(off-chain)/.yarn/releases
+!/backend(off-chain)/.yarn/versions
 
 # testing
 /frontend/coverage
-/backend/coverage
+/backend(off-chain)/coverage
 
 # next.js
 /frontend/.next/
 /frontend/out/
-/backend/.next/
-/backend/out/
+/backend(off-chain)/.next/
+/backend(off-chain)/out/
 
 # production
 /frontend/build
-/backend/build
+/backend(off-chain)/build
 
 # misc
 /frontend/.DS_Store
-/backend/.DS_Store
+/backend(off-chain)/.DS_Store
 /frontend/*.pem
-/backend/*.pem
+/backend(off-chain)/*.pem
 
 # debug
 /frontend/npm-debug.log*
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
-/backend/npm-debug.log*
-/backend/yarn-debug.log*
-/backend/yarn-error.log*
+/backend(off-chain)/npm-debug.log*
+/backend(off-chain)/yarn-debug.log*
+/backend(off-chain)/yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 /frontend/.env*
-/backend/.env*
+/backend(off-chain)/.env*
 
 # vercel
 /frontend/.vercel
-/backend/.vercel
+/backend(off-chain)/.vercel
 
 # typescript
 /frontend/*.tsbuildinfo
 /frontend/next-env.d.ts
-/backend/*.tsbuildinfo
-/backend/next-env.d.ts
+/backend(off-chain)/*.tsbuildinfo
+/backend(off-chain)/next-env.d.ts
