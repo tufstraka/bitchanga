@@ -112,7 +112,6 @@ const InvestorOnboarding = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-medium text-gray-900">{label}</p>
-                  <p className="text-sm text-gray-500">{description}</p>
                 </div>
                 <ChevronRight className={`w-5 h-5 ${
                   formData.accreditationStatus === id ? 'text-blue-500' : 'text-gray-400'

@@ -1,31 +1,62 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Clock, CircleDollarSign, HelpCircle, Info, Shield, ArrowRight, Check, AlertTriangle } from 'lucide-react';
+import { Users, Clock, CircleDollarSign, HelpCircle, Info, Shield, ArrowRight, Check, AlertTriangle, X, RefreshCcw } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ProjectCard = ({ project }) => {
     const [showDetails, setShowDetails] = useState(false);
     const [showBackingModal, setShowBackingModal] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
     const [investmentAmount, setInvestmentAmount] = useState('');
     const [selectedTier, setSelectedTier] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
+
   
     const handleInvestmentSubmit = () => {
       if (!investmentAmount && !selectedTier) return;
       setShowConfirmation(true);
     };
 
-    const handleConfirmInvestment = () => {
-      // To Do: Handle the actual investment transaction
-      setShowConfirmation(false);
-      setShowBackingModal(false);
-      setInvestmentAmount('');
-      setSelectedTier(null);
+    const handleConfirmInvestment = async () => {
+      try {
+        // Simulate an API call
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // Randomly succeed or fail for demo purposes
+            Math.random() > 0.5 ? resolve() : reject(new Error('Insufficient funds'));
+          }, 1000);
+        });
+
+        setShowConfirmation(false);
+        setShowBackingModal(false);
+        setShowSuccessModal(true);
+        
+        // Reset form
+        setInvestmentAmount('');
+        setSelectedTier(null);
+      } catch (error) {
+        setErrorMessage(error.message);
+        setShowConfirmation(false);
+        setShowBackingModal(false);
+        setShowErrorModal(true);
+      }
     };
 
     const handleTierSelect = (amount) => {
       setSelectedTier(amount);
       setInvestmentAmount(amount.toString());
+    };
+
+    const resetAll = () => {
+      setShowSuccessModal(false);
+      setShowErrorModal(false);
+      setShowBackingModal(false);
+      setShowConfirmation(false);
+      setInvestmentAmount('');
+      setSelectedTier(null);
+      setErrorMessage('');
     };
   
     return (
@@ -103,7 +134,7 @@ const ProjectCard = ({ project }) => {
         </Card>
   
         {(showBackingModal || showConfirmation) && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="fixed inset-0  backdrop-blur-sm z-50 flex items-center justify-center p-4 ">
             <div className="w-full max-w-xl my-8">
               <Card className="mx-auto">
                 <CardHeader className="border-b">
@@ -276,6 +307,88 @@ const ProjectCard = ({ project }) => {
                       </div>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+         {/* Success Modal */}
+         {showSuccessModal && (
+          <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Investment Successful!</h3>
+                  <p className="text-gray-600 mb-6">
+                    You have successfully invested {investmentAmount} ckBTC in {project.title}.
+                  </p>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-gray-600">Transaction ID:</span>
+                        <span className="font-mono text-sm">#{Math.random().toString(36).substr(2, 9)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Status:</span>
+                        <span className="text-green-600 font-medium">Confirmed</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={resetAll}
+                      className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Error Modal */}
+        {showErrorModal && (
+          <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <X className="w-8 h-8 text-red-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Investment Failed</h3>
+                  <p className="text-gray-600 mb-6">
+                    {errorMessage || 'There was an error processing your investment. Please try again.'}
+                  </p>
+                  <div className="space-y-4">
+                    <Alert className="bg-red-50 border-red-200">
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-xs text-red-600">
+                        No funds have been deducted from your account.
+                      </AlertDescription>
+                    </Alert>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={resetAll}
+                        className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowErrorModal(false);
+                          setShowBackingModal(true);
+                        }}
+                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <RefreshCcw className="w-4 h-4" />
+                        <span>Try Again</span>
+                      </button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

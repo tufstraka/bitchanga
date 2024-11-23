@@ -1,15 +1,72 @@
-'use client';
+'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Wallet, CheckCircle, AlertCircle, LogOut, ArrowRight } from 'lucide-react';
+import { Wallet, CheckCircle, AlertCircle, LogOut, ArrowRight, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { Actor } from '@dfinity/agent';
 import { idlFactory } from '@/declarations/crowdfunding_platform/bitchanga_backend.did';
 import { Principal } from '@dfinity/principal';
 import { useAgent, useAuth, useIdentity } from '@nfid/identitykit/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { walletService } from '@/services/api';
+
+const formatCKBTC = (amount) => {
+  return `${(amount / 100_000_000).toFixed(8)} ckBTC`;
+};
+
+const RegistrationStatus = ({ status, error, registrationTime, transactionId }) => {
+  const getStatusContent = () => {
+    switch (status) {
+      case 'UserNotAuthenticated':
+        return {
+          title: 'Authentication Required',
+          description: 'Please connect your Internet Identity to continue.',
+          variant: 'destructive'
+        };
+      case 'AlreadyRegistered':
+        return {
+          title: 'Already Registered',
+          description: `You registered on ${new Date(Number(registrationTime/1000000n)).toLocaleString()}`,
+          variant: 'default'
+        };
+      case 'InsufficientFee':
+        return {
+          title: 'Insufficient Balance',
+          description: `You need at least 0.0005 ckBTC to register. Please top up your wallet.`,
+          variant: 'destructive'
+        };
+      case 'TransferFailed':
+        return {
+          title: 'Transfer Failed',
+          description: error || 'The registration fee transfer failed. Please try again.',
+          variant: 'destructive'
+        };
+      case 'Success':
+        return {
+          title: 'Registration Successful',
+          description: `Transaction ID: ${transactionId}`,
+          variant: 'default'
+        };
+      default:
+        return {
+          title: 'Error',
+          description: error || 'An unexpected error occurred.',
+          variant: 'destructive'
+        };
+    }
+  };
+
+  const content = getStatusContent();
+
+  return (
+    <Alert variant={content.variant} className="mt-4">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>{content.title}</AlertTitle>
+      <AlertDescription>{content.description}</AlertDescription>
+    </Alert>
+  );
+};
 
 const CustomConnectWallet = () => {
   const { connect } = useAuth();
@@ -23,7 +80,7 @@ const CustomConnectWallet = () => {
     >
       <div className="text-center">
         <p className="text-gray-600 mb-4">
-          Connect your Internet Identity to access the platform securely.
+          Connect your Internet Identity to access the platform. Registration fee: 0.0005 ckBTC
         </p>
       </div>
       
@@ -53,7 +110,9 @@ const CustomConnectWallet = () => {
 
 const WalletConnect = () => {
   const [error, setError] = useState('');
-  const [principal, setPrincipal] = useState('');
+  const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [registrationData, setRegistrationData] = useState(null);
   const { disconnect, isConnecting, user } = useAuth();
   const router = useRouter();
   const identity = useIdentity();
@@ -61,18 +120,12 @@ const WalletConnect = () => {
 
   const canisterId = process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID;
 
-  useEffect(() => {
-    if (identity) {
-      const principalId = identity.getPrincipal().toText();
-      setPrincipal(principalId);
-
-      console.log('identity', identity);
-      console.log('user', user?.principal);
-    }
-  }, [identity]);
-
   const DashboardProceed = async () => {
     try {
+      setIsRegistering(true);
+      setError('');
+      setRegistrationStatus(null);
+
       if (!agent) throw new Error('Not authenticated. Please connect to proceed.');
       if (!canisterId) throw new Error('Canister ID is not provided.');
 
@@ -81,19 +134,31 @@ const WalletConnect = () => {
         canisterId: Principal.fromText(canisterId),
       });
 
-      //const fee = await actorInstance.getRegistrationFee();
+      //await walletService.connectWallet(Principal.from(user?.principal || '').toText());
 
-      const savedwallet = await walletService.connectWallet(Principal.from(user?.principal || '').toText());
-
-      console.log('savedwallet', savedwallet);
-
-      //const result = await actorInstance.register();
-      console.log('result', result);
-
-      //router.push('/builder-dashboard');
+      const result = await actorInstance.register();
+      
+      if ('ok' in result) {
+        setRegistrationStatus('Success');
+        setRegistrationData({
+          transactionId: result.ok.transactionId,
+          registrationTime: result.ok.registrationTime,
+          fee: result.ok.fee
+        });
+        setTimeout(() => router.push('/builder-dashboard'), 2000);
+      } else if ('err' in result) {
+        setRegistrationStatus(Object.keys(result.err)[0]);
+        if ('AlreadyRegistered' in result.err) {
+          setRegistrationData({
+            registrationTime: result.err.AlreadyRegistered.registrationTime
+          });
+        }
+      }
     } catch (err) {
       console.error('Error in DashboardProceed:', err);
       setError(err.message || 'An error occurred during the registration process.');
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -127,36 +192,47 @@ const WalletConnect = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={DashboardProceed}
-          className="flex items-center justify-center space-x-2 w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all"
+          disabled={isRegistering}
+          className="flex items-center justify-center space-x-2 w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
         >
-          <span>Proceed to Dashboard</span>
-          <ArrowRight className="w-5 h-5" />
+          {isRegistering ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>
+              <span>Register & Proceed (0.0005 ckBTC)</span>
+              <ArrowRight className="w-5 h-5" />
+            </>
+          )}
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={disconnect}
-          className="flex items-center justify-center space-x-2 w-full py-3 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
+          disabled={isRegistering}
+          className="flex items-center justify-center space-x-2 w-full py-3 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all disabled:opacity-50"
         >
           <LogOut className="w-5 h-5" />
           <span>Disconnect Identity</span>
         </motion.button>
       </div>
-    </motion.div>
-  );
 
-  const renderError = () => (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Alert variant="destructive" className="mt-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Connection Failed</AlertTitle>
-        <AlertDescription>{error || 'Please try again.'}</AlertDescription>
-      </Alert>
+      <AnimatePresence>
+        {registrationStatus && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <RegistrationStatus 
+              status={registrationStatus}
+              error={error}
+              registrationTime={registrationData?.registrationTime}
+              transactionId={registrationData?.transactionId}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 
@@ -182,7 +258,6 @@ const WalletConnect = () => {
 
         <div className="p-8">
           {user ? renderConnectedState() : <CustomConnectWallet />}
-          {error && renderError()}
         </div>
       </motion.div>
     </div>

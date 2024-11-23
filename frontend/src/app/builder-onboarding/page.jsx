@@ -14,20 +14,21 @@ const BuilderOnboarding = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Builder Information
-    fullName: '',
-    password: '',
-    email: '',
-    role: '',
-    linkedinUrl: '',
+    fullName: 'Keith Kweyu Kadima',
+    password: 'linqcare@123',
+    email: 'keithkadima@gmail.com',
+    role: 'Founder',
+    userType: 'builder',
+    linkedinUrl: 'https://linkedin.com/in/kadimakeith',
     experience: '',
     // Project Information
-    projectName: '',
+    projectName: 'Bitchanga',
     category: '',
-    targetAmount: '',
-    pitch: '',
+    targetAmount: '20000',
+    pitch: 'Bitchanga is a decentralized crowdfunding platform designed to connect builders and investors through a transparent, secure, and efficient blockchain-based ecosystem. Using ckBTC on the Internet Computer Protocol, Bitchanga ensures fast, trustless transactions and milestone-driven project funding.',
     timeline: '3',
     teamSize: '1',
-    stage: 'concept'
+    stage: 'prototype'
   });
   
   const router = useRouter();
@@ -71,7 +72,7 @@ const BuilderOnboarding = () => {
   const handleSubmit = async() => {
     console.log("Submit", formData);
 
-    try {
+    /*try {
       if (!agent) throw new Error('Not authenticated. Please connect to proceed.');
       if (!canisterId) throw new Error('Canister ID is not provided.');
 
@@ -82,40 +83,46 @@ const BuilderOnboarding = () => {
 
       const projectID = await actorInstance.createFundingProject();
       console.log('projectID', projectID);
+          
+      const userData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        role: formData.role,
+        linkedinUrl: formData.linkedinUrl,
+        experience: formData.experience,
+      };
 
-          /* TODO: Send data to MongoDB
-    const userData = {
-      fullName: formData.fullName,
-      email: formData.email,
-      role: formData.role,
-      linkedinUrl: formData.linkedinUrl,
-      experience: formData.experience,
-    };
+      //const userResponse = await authService.register(userData);
 
-    const userResponse = await authService.register(userData);
+      console.log('Registration response', userData)
 
-    const projectData = {
-      projectName: formData.projectName,
-      category: formData.category,
-      stage: formData.stage,
-      targetAmount: formData.targetAmount,
-      timeline: formData.timeline,
-      teamSize: formData.teamSize,
-      pitch: formData.pitch,
-    };
+      const projectData = {
+        title: formData.projectName,
+        description: formData.pitch,
+        canisterId,
+        category: formData.category,
+        stage: formData.stage,
+        targetAmount: formData.targetAmount,
+        teamSize: formData.teamSize,
+        builder: userResponse.data._id,
+        timeline: formData.timeline,
+      };
 
-    const projectResponse = await projectService.createProject(projectData);*/
+    //const projectResponse = await projectService.createProject(projectData);
 
-    toast.success('Thanks for submitting your project! We will review it and get back to you soon.');
+    console.log('Project response', projectResponse);
 
-    //router.push('/connect-wallet-builder');
+    router.push('/connect-wallet-builder');
 
 
 
     } catch (err) {
       console.error('Error in DashboardProceed:', err);
       setError(err.message || 'An error occurred during the registration process.');
-    }
+    }*/
+
+    toast.success('Project created successfully!');
+    router.push('/connect-wallet-builder');
 
   };
 

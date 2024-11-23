@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { jwtDecode } from 'jwt-decode';
 
 // Dynamically import the LandingPage component with no SSR
-const LandingPage = dynamic(() => import('./pages/landingpage'), {
+const LandingPage = dynamic(() => import('../components/landingpage'), {
   ssr: false,
 });
 

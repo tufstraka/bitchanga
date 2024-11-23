@@ -91,6 +91,107 @@ const BuilderDashboard = () => {
 
   const canisterId = process.env.NEXT_PUBLIC_CKBTC_LEDGER_CANISTER_ID;
 
+  //To Do: Check Registration Status before allowing access to the dashboard
+  /*const REGISTRATION_FEE = 100; // in ckBTC
+  const WHITELIST_CANISTER_ID = process.env.NEXT_PUBLIC_WHITELIST_CANISTER_ID;
+  const REGISTRATION_CANISTER_ID = process.env.NEXT_PUBLIC_REGISTRATION_CANISTER_ID;
+
+  useEffect(() => {
+    if (user && identity) {
+      checkAccess();
+    } else {
+      setIsLoading(false);
+    }
+  }, [user, identity]);
+
+  const checkAccess = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Check whitelist status
+      const whitelistStatus = await checkWhitelistStatus();
+      setIsWhitelisted(whitelistStatus);
+
+      // Check registration status
+      const registrationStatus = await checkRegistrationStatus();
+      setHasRegistered(registrationStatus);
+
+    } catch (err) {
+      console.error('Error checking access:', err);
+      setError('Failed to verify access status. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkWhitelistStatus = async () => {
+    try {
+      if (!agent || !WHITELIST_CANISTER_ID) return false;
+
+      const whitelistActor = Actor.createActor(whitelistIdlFactory, {
+        agent,
+        canisterId: Principal.fromText(WHITELIST_CANISTER_ID),
+      });
+
+      const status = await whitelistActor.isWhitelisted(user.principal);
+      return status;
+    } catch (err) {
+      console.error('Error checking whitelist:', err);
+      throw new Error('Failed to check whitelist status');
+    }
+  };
+
+  const checkRegistrationStatus = async () => {
+    try {
+      if (!agent || !REGISTRATION_CANISTER_ID) return false;
+
+      const registrationActor = Actor.createActor(registrationIdlFactory, {
+        agent,
+        canisterId: Principal.fromText(REGISTRATION_CANISTER_ID),
+      });
+
+      const status = await registrationActor.hasRegistered(user.principal);
+      return status;
+    } catch (err) {
+      console.error('Error checking registration:', err);
+      throw new Error('Failed to check registration status');
+    }
+  };
+
+  const handleRegistration = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+
+      if (!agent || !REGISTRATION_CANISTER_ID) {
+        throw new Error('Registration service not available');
+      }
+
+      const registrationActor = Actor.createActor(registrationIdlFactory, {
+        agent,
+        canisterId: Principal.fromText(REGISTRATION_CANISTER_ID),
+      });
+
+      // Process registration fee payment
+      await registrationActor.register({
+        amount: REGISTRATION_FEE,
+        from: user.principal,
+      });
+
+      // Verify registration
+      const status = await checkRegistrationStatus();
+      setHasRegistered(status);
+
+    } catch (err) {
+      console.error('Registration failed:', err);
+      setError('Failed to process registration. Please ensure you have sufficient ckBTC balance.');
+    } finally {
+      setIsLoading(false);
+    }
+  };*/
+
+
 
   const connectWallet = async () => {
     try {

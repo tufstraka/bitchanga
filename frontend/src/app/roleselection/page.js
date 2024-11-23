@@ -5,7 +5,7 @@ function RoleSelection() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-gray-900">Welcome to LaunchPad</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Welcome to Bitchanga</h1>
           <p className="text-xl text-gray-600">Tell us who you are, and let&apos;s get started</p>
         </div>
 
