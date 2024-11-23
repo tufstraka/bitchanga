@@ -51,6 +51,10 @@ Follow these simple steps to begin your journey on Bitchanga:
 
 ---
 
+##  ⚒️ Local Setup 
+
+---
+
 ## 💡 Why ckBTC?  
 
 - **Fast and Reliable**: Instant settlements without intermediaries.  
