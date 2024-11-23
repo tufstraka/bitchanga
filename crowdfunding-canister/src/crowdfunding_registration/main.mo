@@ -83,11 +83,12 @@ actor class CrowdfundingRegistration() {
 
     // Constants
     private let CKBTC_CANISTER_ID : Principal = Principal.fromText("mxzaz-hqaaa-aaaar-qaada-cai");
-    private let FEE_RECIPIENT : Principal = Principal.fromText("yuvjs-4l73d-56lg6-7744r-4cbgl-cpovl-f5hga-o5fx4-iub6d-edkl7-rqe");
+    private let FEE_RECIPIENT : Principal = Principal.fromText("2saul-3mgwg-nsneo-h6s2g-euwyy-4rnzr-u7o7a-cwwbh-ckdk2-66ejx-wae");
     private let REGISTRATION_FEE : Nat = 50_000; // 0.0005 ckBTC
     private let MIN_FUNDING_DURATION_DAYS : Nat = 1;
     private let MAX_FUNDING_DURATION_DAYS : Nat = 90;
     private let TRUSTED_ORIGINS : [Text] = [
+        "https://z4gvt-waaaa-aaaam-qcagq-cai.icp0.io",
         "https://main.dhq94roejc17t.amplifyapp.com",
         "http://localhost:3000"
     ];
