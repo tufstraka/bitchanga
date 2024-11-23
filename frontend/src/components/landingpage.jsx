@@ -96,7 +96,7 @@ const LandingPage = () => {
               {['Dashboard', 'Projects', 'Launch'].map((item) => (
                 <Link
                   key={item}
-                  href="#"
+                  href="/roleselection"
                   className="block py-3 text-gray-300 hover:text-white transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -145,10 +145,12 @@ const LandingPage = () => {
                     <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
+                <Link href="https://www.youtube.com/watch?v=4WrnIxb5-iQ">
                 <Button variant="outline" className="w-full sm:w-auto group bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-black rounded-full px-6 sm:px-8 py-4 sm:py-6 font-semibold transition-all hover:scale-105">
                   <PlayCircle className="mr-2" />
                   Watch Demo
                 </Button>
+                </Link>
               </div>
             </div>
             

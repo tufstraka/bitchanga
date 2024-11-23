@@ -14,18 +14,18 @@ const BuilderOnboarding = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Builder Information
-    fullName: 'Keith Kweyu Kadima',
-    password: 'linqcare@123',
-    email: 'keithkadima@gmail.com',
-    role: 'Founder',
-    userType: 'builder',
-    linkedinUrl: 'https://linkedin.com/in/kadimakeith',
+    fullName: '',
+    password: '',
+    email: '',
+    role: '',
+    userType: '',
+    linkedinUrl: '',
     experience: '',
     // Project Information
-    projectName: 'Bitchanga',
+    projectName: '',
     category: '',
-    targetAmount: '20000',
-    pitch: 'Bitchanga is a decentralized crowdfunding platform designed to connect builders and investors through a transparent, secure, and efficient blockchain-based ecosystem. Using ckBTC on the Internet Computer Protocol, Bitchanga ensures fast, trustless transactions and milestone-driven project funding.',
+    targetAmount: '',
+    pitch: '',
     timeline: '3',
     teamSize: '1',
     stage: 'prototype'
