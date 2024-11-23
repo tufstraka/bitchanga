@@ -83,7 +83,7 @@ actor class CrowdfundingRegistration() {
 
     // Constants
     private let CKBTC_CANISTER_ID : Principal = Principal.fromText("mxzaz-hqaaa-aaaar-qaada-cai");
-    private let FEE_RECIPIENT : Principal = Principal.fromText("2saul-3mgwg-nsneo-h6s2g-euwyy-4rnzr-u7o7a-cwwbh-ckdk2-66ejx-wae");
+    private let FEE_RECIPIENT : Principal = Principal.fromText("yuvjs-4l73d-56lg6-7744r-4cbgl-cpovl-f5hga-o5fx4-iub6d-edkl7-rqe");
     private let REGISTRATION_FEE : Nat = 50_000; // 0.0005 ckBTC
     private let MIN_FUNDING_DURATION_DAYS : Nat = 1;
     private let MAX_FUNDING_DURATION_DAYS : Nat = 90;
@@ -100,7 +100,8 @@ actor class CrowdfundingRegistration() {
     private stable var nextProjectId : Nat = 0;
 
     private stable var adminPrincipals : [Principal] = [
-        Principal.fromText("2saul-3mgwg-nsneo-h6s2g-euwyy-4rnzr-u7o7a-cwwbh-ckdk2-66ejx-wae")
+        Principal.fromText("2saul-3mgwg-nsneo-h6s2g-euwyy-4rnzr-u7o7a-cwwbh-ckdk2-66ejx-wae"),
+        Principal.fromText("yuvjs-4l73d-56lg6-7744r-4cbgl-cpovl-f5hga-o5fx4-iub6d-edkl7-rqe")
     ];
     
     private var registeredUsers = HashMap.HashMap<Principal, UserRegistration>(10, Principal.equal, Principal.hash);
