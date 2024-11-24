@@ -53,6 +53,23 @@ Follow these simple steps to begin your journey on Bitchanga:
 
 ##  ⚒️ Local Setup 
 
+Clone the repo.
+- To launch the dev environment for the frontend
+
+```sh
+cd frontend
+dfx start --background
+dfx deploy
+```
+
+- To deploy the canister on the local network
+
+```sh
+cd crowdfunding_canister
+dfx start --background 
+dfx deploy
+```
+
 ---
 
 ## 💡 Why ckBTC?  
