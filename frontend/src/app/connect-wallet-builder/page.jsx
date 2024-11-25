@@ -118,7 +118,7 @@ const WalletConnect = () => {
   const identity = useIdentity();
   const agent = useAgent();
 
-  const canisterId = process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID;
+  const canisterId = process.env.NEXT_PUBLIC_DEV_CROWDFUNDING_CANISTER_ID;
 
   const DashboardProceed = async () => {
     try {
@@ -136,9 +136,37 @@ const WalletConnect = () => {
 
       //await walletService.connectWallet(Principal.from(user?.principal || '').toText());
 
-      const result = await actorInstance.register();
+      //const registrationResult = await actorInstance.register();
+
+      const userData = localStorage.getItem('user');
+      const userSubmission = JSON.parse(userData);
+
+      console.log('userSubmission', userSubmission);
+
+      let principal = user?.principal;
+      console.log('principal', principal);
+
+      const targetAmount = parseFloat(userSubmission.targetAmount);
+      if (isNaN(targetAmount) || targetAmount < 0) {
+        throw new Error('Invalid target amount. Please provide a valid positive number.');
+      }
+      const timeline = parseFloat(userSubmission.timeline);
+      const timelineNat = BigInt(timeline);
+      const targetAmountNat = BigInt(targetAmount);
+      const projectName = userSubmission.projectName;
+      const projectDescription = userSubmission.pitch;
+
+      const createProject = await actorInstance.createFundingProject(
+        principal,
+        targetAmountNat,
+        timelineNat,
+        projectName,
+        projectDescription,
+      );
+
+      console.log(createProject);
       
-      if ('ok' in result) {
+      if ('ok' in registrationResult && 'ok' in createProject) {
         setRegistrationStatus('Success');
         setRegistrationData({
           transactionId: result.ok.transactionId,
