@@ -9,11 +9,12 @@ import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
-import _Random "mo:base/Random";
-import _Blob "mo:base/Blob";
+import Random "mo:base/Random";
+import Blob "mo:base/Blob";
 import Hash "mo:base/Hash";
 import _Debug "mo:base/Debug";
 import Nat64 "mo:base/Nat64";
+import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
 
 
@@ -186,29 +187,24 @@ actor Crowdfunding {
     };
     
     private func generateEscrowSubaccount(projectId : Nat) : [Nat8] {
-        let buf = Buffer.Buffer<Nat8>(32);
+        let n : Nat32 = Nat32.fromNat(projectId);
         
-        // Fill first 28 bytes with 0
-        for (i in Iter.range(0, 27)) {
-            buf.add(0);
+        func byte(i : Nat) : Nat8 {
+            Nat8.fromNat(Nat32.toNat(n >> (Nat32.fromNat(i) * 8) & 0xFF))
         };
-        
-        // Convert projectId to bytes and add them to the end
-        // We'll take the last 4 bytes of the projectId
-        var n = projectId;
-        for (i in Iter.range(0, 3)) {
-            let byte : Nat8 = Nat8.fromNat(n % 256);
-            buf.add(byte);
-            n := n / 256;
-        };
-        
-        // If buffer size is less than 32, pad with zeros
-        while (buf.size() < 32) {
-            buf.add(0);
-        };
-        
-        Buffer.toArray(buf)
+
+        Array.tabulate<Nat8>(32, func (i : Nat) : Nat8 {
+            if (i < 4) {
+                byte(3 - i)  // First 4 bytes in reverse order
+            } else if (i < 8) {
+                byte(i - 4)  // Next 4 bytes in original order
+            } else {
+                let value = Nat32.toNat(n) + i;
+                Nat8.fromNat(value % 256)  // Remaining bytes
+            }
+        })
     };
+
     private func getEscrowAccount(projectId : Nat) : { owner : Principal; subaccount : ?[Nat8] } {
         {
             owner = Principal.fromActor(Crowdfunding);
