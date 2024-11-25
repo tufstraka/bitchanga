@@ -89,8 +89,8 @@ Bitchanga ensures a secure and trustworthy crowdfunding environment:
 
 ---
 
-- **Frontend Canister ID**: z4gvt-waaaa-aaaam-qcagq-cai
-- **Backend Canister ID**: vwyrn-laaaa-aaaah-qpwnq-cai
+- **Frontend Canister ID**: [z4gvt-waaaa-aaaam-qcagq-cai](./https://z4gvt-waaaa-aaaam-qcagq-cai.icp0.io/)
+- **Backend Canister ID**: qncn4-nqaaa-aaaah-qpwsq-cai
 
 ## 🌍 Transforming Crowdfunding  
 
