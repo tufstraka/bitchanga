@@ -39,9 +39,9 @@ function RoleSelection() {
                 <p className="text-center text-gray-600">
                   Looking for the next big opportunity? Join as an investor to discover innovative projects and support promising founders.
                 </p>
-                <a href="/investor-onboarding" className="inline-block">
+                <a href="/investor-onboarding" className="inline-block pointer-events-none opacity-50">
                   <span className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    Start Investing →
+                    Start Investing → (Coming Soon)
                   </span>
                 </a>
               </div>
