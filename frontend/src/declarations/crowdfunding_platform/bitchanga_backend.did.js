@@ -17,8 +17,8 @@ export const idlFactory = ({ IDL }) => {
     'ProjectNotFound' : IDL.Null,
     'InsufficientFunds' : IDL.Null,
   });
-  const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : RegistrationError });
-  const Result_4 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : RegistrationError });
+  const Result_1 = IDL.Variant({ 'ok' : IDL.Null, 'err' : RegistrationError });
+  const Result_5 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : RegistrationError });
   const Contribution = IDL.Record({
     'timestamp' : Time,
     'amount' : IDL.Nat,
@@ -42,11 +42,11 @@ export const idlFactory = ({ IDL }) => {
     'registrationTime' : Time,
     'transactionId' : IDL.Nat,
   });
-  const Result_3 = IDL.Variant({
+  const Result_4 = IDL.Variant({
     'ok' : IDL.Vec(UserRegistration),
     'err' : RegistrationError,
   });
-  const Result_2 = IDL.Variant({
+  const Result_3 = IDL.Variant({
     'ok' : ProjectFunding,
     'err' : RegistrationError,
   });
@@ -55,22 +55,33 @@ export const idlFactory = ({ IDL }) => {
     'registrationTime' : Time,
     'transactionId' : IDL.Nat,
   });
-  const Result_1 = IDL.Variant({
+  const Result_2 = IDL.Variant({
     'ok' : RegistrationSuccess,
     'err' : RegistrationError,
   });
-  const CrowdfundingRegistration = IDL.Service({
-    'addAdmin' : IDL.Func([IDL.Principal], [Result], []),
-    'contribute' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
+  const Result = IDL.Variant({ 'ok' : IDL.Text, 'err' : RegistrationError });
+  return IDL.Service({
+    'addAdmin' : IDL.Func([IDL.Principal], [Result_1], []),
+    'contribute' : IDL.Func([IDL.Nat, IDL.Nat], [Result_1], []),
     'createFundingProject' : IDL.Func(
         [IDL.Principal, IDL.Nat, IDL.Nat, IDL.Text, IDL.Text],
-        [Result_4],
+        [Result_5],
         [],
       ),
     'getActiveProjects' : IDL.Func([], [IDL.Vec(ProjectFunding)], ['query']),
     'getAllProjects' : IDL.Func([], [IDL.Vec(ProjectFunding)], ['query']),
-    'getAllRegisteredUsers' : IDL.Func([], [Result_3], ['query']),
-    'getProject' : IDL.Func([IDL.Nat], [Result_2], ['query']),
+    'getAllRegisteredUsers' : IDL.Func([], [Result_4], ['query']),
+    'getEscrowAccountForProject' : IDL.Func(
+        [IDL.Nat],
+        [
+          IDL.Record({
+            'owner' : IDL.Principal,
+            'subaccount' : IDL.Opt(IDL.Vec(IDL.Nat8)),
+          }),
+        ],
+        ['query'],
+      ),
+    'getProject' : IDL.Func([IDL.Nat], [Result_3], ['query']),
     'getProjectsByCreator' : IDL.Func(
         [IDL.Principal],
         [IDL.Vec(ProjectFunding)],
@@ -88,11 +99,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isRegistered' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
-    'register' : IDL.Func([], [Result_1], []),
-    'releaseFunds' : IDL.Func([IDL.Nat], [Result], []),
-    'removeAdmin' : IDL.Func([IDL.Principal], [Result], []),
-    'withdrawContribution' : IDL.Func([IDL.Nat], [Result], []),
+    'register' : IDL.Func([], [Result_2], []),
+    'releaseFunds' : IDL.Func([IDL.Nat], [Result_1], []),
+    'removeAdmin' : IDL.Func([IDL.Principal], [Result_1], []),
+    'withdrawContribution' : IDL.Func([IDL.Nat], [Result_1], []),
+    'withdrawToBitcoin' : IDL.Func([IDL.Text, IDL.Nat], [Result], []),
   });
-  return CrowdfundingRegistration;
 };
 export const init = ({ IDL }) => { return []; };
