@@ -1,7 +1,7 @@
 {
   "canisters": {
-    "crowdfunding_registration": {
-      "main": "src/crowdfunding_registration/main.mo",
+    "crowdfunding": {
+      "main": "src/crowdfunding/main.mo",
       "type": "motoko"
     }
   },
