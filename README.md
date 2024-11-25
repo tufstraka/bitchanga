@@ -51,6 +51,27 @@ Follow these simple steps to begin your journey on Bitchanga:
 
 ---
 
+##  ⚒️ Local Setup 
+
+Clone the repo.
+- To launch the dev environment for the frontend
+
+```sh
+cd frontend
+dfx start --background
+dfx deploy
+```
+
+- To deploy the canister on the local network
+
+```sh
+cd crowdfunding_canister
+dfx start --background 
+dfx deploy
+```
+
+---
+
 ## 💡 Why ckBTC?  
 
 - **Fast and Reliable**: Instant settlements without intermediaries.  
@@ -67,6 +88,9 @@ Bitchanga ensures a secure and trustworthy crowdfunding environment:
 - **Transparent Operations**: All transactions and progress are recorded on the blockchain.  
 
 ---
+
+- **Frontend Canister ID**: z4gvt-waaaa-aaaam-qcagq-cai
+- **Backend Canister ID**: vwyrn-laaaa-aaaah-qpwnq-cai
 
 ## 🌍 Transforming Crowdfunding  
 
