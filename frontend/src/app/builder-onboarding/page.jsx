@@ -72,6 +72,9 @@ const BuilderOnboarding = () => {
   const handleSubmit = async() => {
     console.log("Submit", formData);
 
+    // Save formData to localStorage
+    localStorage.setItem('user', JSON.stringify(formData));
+
     /*try {
       if (!agent) throw new Error('Not authenticated. Please connect to proceed.');
       if (!canisterId) throw new Error('Canister ID is not provided.');
@@ -120,8 +123,7 @@ const BuilderOnboarding = () => {
       console.error('Error in DashboardProceed:', err);
       setError(err.message || 'An error occurred during the registration process.');
     }*/
-
-    toast.success('Project created successfully!');
+    
     router.push('/connect-wallet-builder');
 
   };
