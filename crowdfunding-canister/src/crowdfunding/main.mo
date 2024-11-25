@@ -19,7 +19,7 @@ import Nat8 "mo:base/Nat8";
 
 
 
-actor class Crowdfunding() {
+actor Crowdfunding {
 
     // Types
     type RegistrationError = {
@@ -181,6 +181,10 @@ actor class Crowdfunding() {
         project.isActive and Time.now() <= project.deadline
     };
 
+     public query func getEscrowAccountForProject(projectId: Nat): async { owner: Principal; subaccount: ?[Nat8] } {
+        getEscrowAccount(projectId)
+    };
+    
     private func generateEscrowSubaccount(projectId : Nat) : [Nat8] {
         let buf = Buffer.Buffer<Nat8>(32);
         
@@ -207,7 +211,7 @@ actor class Crowdfunding() {
     };
     private func getEscrowAccount(projectId : Nat) : { owner : Principal; subaccount : ?[Nat8] } {
         {
-            owner = Principal.fromActor(actor "this");
+            owner = Principal.fromActor(Crowdfunding);
             subaccount = ?generateEscrowSubaccount(projectId)
         }
     };
