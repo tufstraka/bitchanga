@@ -9,13 +9,18 @@ import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
-import Random "mo:base/Random";
-import Blob "mo:base/Blob";
+import _Random "mo:base/Random";
+import _Blob "mo:base/Blob";
 import Hash "mo:base/Hash";
-import Debug "mo:base/Debug";
+import _Debug "mo:base/Debug";
+import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
 
 
-actor class CrowdfundingRegistration() {
+
+
+actor class Crowdfunding() {
+
     // Types
     type RegistrationError = {
         #InsufficientFee : { required : Nat; provided : Nat };
@@ -37,6 +42,39 @@ actor class CrowdfundingRegistration() {
         #Err : Text;
     };
 
+    type WithdrawalError = {
+        #InvalidAddress : Text;
+        #InsufficientBalance;
+        #TransferFailed : Text;
+        #MinimumWithdrawalNotMet;
+        #MaximumWithdrawalExceeded;
+    };
+
+    type RetrieveBtcRequest = {
+        address : Text;
+        amount : Nat64;
+    };
+
+    type RetrieveBtcResponse = {
+        #Ok : Text;  // Block ID
+        #Err : WithdrawalError;
+    };
+
+    type ApproveArgs = {
+        spender : Principal;
+        amount : Nat;
+        fee : ?Nat;
+        memo : ?[Nat8];
+        from_subaccount : ?[Nat8];
+        created_at_time : ?Nat64;
+    };
+
+
+    private type CkBTCMinter = actor {
+        retrieve_btc : shared RetrieveBtcRequest -> async RetrieveBtcResponse;
+        get_withdrawal_fee : shared query () -> async Nat64;
+    };
+
     type ICRC1_Actor = actor {
         icrc1_balance_of : shared query { owner : Principal; subaccount : ?[Nat8] } -> async Nat;
         icrc1_transfer : shared {
@@ -47,6 +85,10 @@ actor class CrowdfundingRegistration() {
             memo : ?[Nat8];
             created_at_time : ?Nat64;
         } -> async ICRC1_Transfer_Result;
+        icrc1_approve : shared ApproveArgs -> async ICRC1_Transfer_Result;
+        icrc1_allowance : shared query { account : Principal; spender : Principal } -> async { allowance : Nat; expires_at : ?Nat64 };
+
+
     };
 
     type Contribution = {
@@ -92,12 +134,17 @@ actor class CrowdfundingRegistration() {
         "https://main.dhq94roejc17t.amplifyapp.com",
         "http://localhost:3000"
     ];
+    private let CKBTC_MINTER_CANISTER_ID : Principal = Principal.fromText("mqygn-kiaaa-aaaar-qaadq-cai");
+    private let MIN_WITHDRAWAL_AMOUNT : Nat = 1_000;  // 0.00001 ckBTC
+    private let MAX_WITHDRAWAL_AMOUNT : Nat = 1_000_000_000;  // 10 ckBTC
+    private let ckbtcMinter : CkBTCMinter = actor(Principal.toText(CKBTC_MINTER_CANISTER_ID));
+
 
     // State
     private stable var registeredUsersEntries : [(Principal, UserRegistration)] = [];
     private stable var projectFundingEntries : [(Nat, ProjectFunding)] = [];
-    private stable var nextTransactionId : Nat = 0;
-    private stable var nextProjectId : Nat = 0;
+    private stable var nextTransactionId : Nat = 1;
+    private stable var nextProjectId : Nat = 1;
 
     private stable var adminPrincipals : [Principal] = [
         Principal.fromText("2saul-3mgwg-nsneo-h6s2g-euwyy-4rnzr-u7o7a-cwwbh-ckdk2-66ejx-wae"),
@@ -118,7 +165,7 @@ actor class CrowdfundingRegistration() {
     };
 
     // Helper Functions
-    private func validateOrigin(origin : Text) : Bool {
+    private func _validateOrigin(origin : Text) : Bool {
         Option.isSome(Array.find<Text>(TRUSTED_ORIGINS, func(trusted : Text) : Bool { trusted == origin }))
     };
 
@@ -133,6 +180,128 @@ actor class CrowdfundingRegistration() {
     private func isProjectActive(project : ProjectFunding) : Bool {
         project.isActive and Time.now() <= project.deadline
     };
+
+    private func generateEscrowSubaccount(projectId : Nat) : [Nat8] {
+        let buf = Buffer.Buffer<Nat8>(32);
+        
+        // Fill first 28 bytes with 0
+        for (i in Iter.range(0, 27)) {
+            buf.add(0);
+        };
+        
+        // Convert projectId to bytes and add them to the end
+        // We'll take the last 4 bytes of the projectId
+        var n = projectId;
+        for (i in Iter.range(0, 3)) {
+            let byte : Nat8 = Nat8.fromNat(n % 256);
+            buf.add(byte);
+            n := n / 256;
+        };
+        
+        // If buffer size is less than 32, pad with zeros
+        while (buf.size() < 32) {
+            buf.add(0);
+        };
+        
+        Buffer.toArray(buf)
+    };
+    private func getEscrowAccount(projectId : Nat) : { owner : Principal; subaccount : ?[Nat8] } {
+        {
+            owner = Principal.fromActor(actor "this");
+            subaccount = ?generateEscrowSubaccount(projectId)
+        }
+    };
+
+    /*private func isValidBitcoinAddress(address : Text) : Bool {
+        // Basic validation 
+        let length = Text.size(address);
+        if (length < 26 or length > 35) {
+            return false;
+        };
+
+        // Check if address starts with valid prefixes
+        let validPrefixes = ["1", "3", "bc1"];
+        for (prefix in validPrefixes.vals()) {
+            if (Text.startsWith(address, #text prefix)) {
+                return true;
+            };
+        };
+        false;
+    };*/
+
+    public shared({ caller }) func withdrawToBitcoin(
+        btcAddress : Text,
+        amount : Nat
+    ) : async Result.Result<Text, RegistrationError> {
+        if (Principal.isAnonymous(caller)) {
+            return #err(#UserNotAuthenticated);
+        };
+
+        // Validate amount
+        if (amount < MIN_WITHDRAWAL_AMOUNT) {
+            return #err(#InvalidAmount);
+        };
+
+        if (amount > MAX_WITHDRAWAL_AMOUNT) {
+            return #err(#InvalidAmount);
+        };
+
+        let balance = await ckbtc.icrc1_balance_of({ owner = caller; subaccount = null });
+        if (balance < amount) {
+            return #err(#InsufficientFunds);
+        };
+
+        let withdrawalFee = await ckbtcMinter.get_withdrawal_fee();
+        let totalAmount = Nat64.toNat(withdrawalFee) + amount;
+
+        if (balance < totalAmount) {
+            return #err(#InsufficientFunds);
+        };
+
+        try {
+            // First transfer ckBTC to the minter
+            let transferResult = await ckbtc.icrc1_transfer({
+                from_subaccount = null;
+                to = { owner = CKBTC_MINTER_CANISTER_ID; subaccount = null };
+                amount = totalAmount;
+                fee = null;
+                memo = null;
+                created_at_time = null;
+            });
+
+            switch (transferResult) {
+                case (#Ok(_)) {
+                    // If transfer successful, initiate BTC withdrawal
+                    let withdrawalRequest : RetrieveBtcRequest = {
+                        address = btcAddress;
+                        amount = Nat64.fromNat(amount);
+                    };
+
+                    let withdrawalResult = await ckbtcMinter.retrieve_btc(withdrawalRequest);
+                    
+                    switch (withdrawalResult) {
+                        case (#Ok(blockId)) {
+                            #ok(blockId)
+                        };
+                        case (#Err(e)) {
+                            switch (e) {
+                                case (#InvalidAddress(_)) { #err(#CanisterError("Invalid Bitcoin address")) };
+                                case (#InsufficientBalance) { #err(#InsufficientFunds) };
+                                case (#TransferFailed(msg)) { #err(#TransferFailed(msg)) };
+                                case (_) { #err(#CanisterError("Withdrawal failed")) };
+                            };
+                        };
+                    };
+                };
+                case (#Err(e)) { #err(#TransferFailed(e)) };
+            };
+        } catch (e) {
+            #err(#CanisterError(Error.message(e)))
+        };
+    };
+
+
+
 
     // Registration Functions
     public shared({ caller }) func register() : async Result.Result<RegistrationSuccess, RegistrationError> {
@@ -204,16 +373,17 @@ actor class CrowdfundingRegistration() {
             return #err(#InvalidAmount);
         };
 
-        //To Do: Fix this logic
 
         let deadline = Time.now() + (durationInDays * 24 * 60 * 60 * 1_000_000_000);
-        let randomBytes = await Random.blob();
-        let escrowAccount = Principal.fromBlob(randomBytes);
+        let projectId = nextProjectId;
+        let escrowAccount = getEscrowAccount(projectId);
+
+
 
         let newProject : ProjectFunding = {
             creator = caller;
             beneficiary = beneficiary;
-            escrowAccount = escrowAccount;
+            escrowAccount = escrowAccount.owner;
             fundingGoal = fundingGoal;
             deadline = deadline;
             totalFunds = 0;
@@ -224,7 +394,6 @@ actor class CrowdfundingRegistration() {
             description = description;
         };
 
-        let projectId = nextProjectId;
         projectFundings.put(projectId, newProject);
         nextProjectId += 1;
 
@@ -257,9 +426,10 @@ actor class CrowdfundingRegistration() {
                 };
 
                 try {
+                    let escrowAccount = getEscrowAccount(projectId);
                     let transferResult = await ckbtc.icrc1_transfer({
                         from_subaccount = null;
-                        to = { owner = project.escrowAccount; subaccount = null };
+                        to = escrowAccount;
                         amount = amount;
                         fee = null;
                         memo = null;
@@ -276,17 +446,9 @@ actor class CrowdfundingRegistration() {
 
                             let updatedContributions = Array.append(project.contributions, [newContribution]);
                             let updatedProject : ProjectFunding = {
-                                creator = project.creator;
-                                beneficiary = project.beneficiary;
-                                escrowAccount = project.escrowAccount;
-                                fundingGoal = project.fundingGoal;
-                                deadline = project.deadline;
+                                project with
                                 totalFunds = project.totalFunds + amount;
-                                isActive = project.isActive;
                                 contributions = updatedContributions;
-                                createdAt = project.createdAt;
-                                title = project.title;
-                                description = project.description;
                             };
                             projectFundings.put(projectId, updatedProject);
                             #ok(())
@@ -300,7 +462,6 @@ actor class CrowdfundingRegistration() {
         };
     };
 
-    //To Do: Refactor this function
     public shared({ caller }) func withdrawContribution(projectId : Nat) : async Result.Result<(), RegistrationError> {
         switch (projectFundings.get(projectId)) {
             case (null) { return #err(#ProjectNotFound); };
@@ -314,8 +475,9 @@ actor class CrowdfundingRegistration() {
                     case (null) { return #err(#InsufficientFunds); };
                     case (?contribution) {
                         try {
+                            let escrowAccount = getEscrowAccount(projectId);
                             let transferResult = await ckbtc.icrc1_transfer({
-                                from_subaccount = null;
+                                from_subaccount = escrowAccount.subaccount;
                                 to = { owner = caller; subaccount = null };
                                 amount = contribution.amount;
                                 fee = null;
@@ -373,8 +535,15 @@ actor class CrowdfundingRegistration() {
                 };
 
                 try {
+                    let escrowAccount = getEscrowAccount(projectId);
+                    let escrowBalance = await ckbtc.icrc1_balance_of(escrowAccount);
+                    
+                    if (escrowBalance < project.totalFunds) {
+                        return #err(#InsufficientFunds);
+                    };
+
                     let transferResult = await ckbtc.icrc1_transfer({
-                        from_subaccount = null;
+                        from_subaccount = escrowAccount.subaccount;
                         to = { owner = project.beneficiary; subaccount = null };
                         amount = project.totalFunds;
                         fee = null;
@@ -385,17 +554,10 @@ actor class CrowdfundingRegistration() {
                     switch (transferResult) {
                         case (#Ok(_)) {
                             let updatedProject : ProjectFunding = {
-                                creator = project.creator;
-                                beneficiary = project.beneficiary;
-                                escrowAccount = project.escrowAccount;
-                                fundingGoal = project.fundingGoal;
-                                deadline = project.deadline;
+                                project with
                                 totalFunds = 0;
                                 isActive = false;
                                 contributions = [];
-                                createdAt = project.createdAt;
-                                title = project.title;
-                                description = project.description;
                             };
                             projectFundings.put(projectId, updatedProject);
                             #ok(())
@@ -409,7 +571,7 @@ actor class CrowdfundingRegistration() {
         };
     };
 
-    // Query Functions (continued)
+    // Query Functions 
     public query func getProject(projectId : Nat) : async Result.Result<ProjectFunding, RegistrationError> {
         switch (projectFundings.get(projectId)) {
             case (null) { #err(#ProjectNotFound) };
