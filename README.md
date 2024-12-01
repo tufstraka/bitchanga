@@ -58,6 +58,7 @@ Clone the repo.
 
 ```sh
 cd frontend
+npm install
 dfx start --background
 dfx deploy
 ```
@@ -89,7 +90,7 @@ Bitchanga ensures a secure and trustworthy crowdfunding environment:
 
 ---
 
-- **Frontend Canister ID**: [z4gvt-waaaa-aaaam-qcagq-cai](./https://z4gvt-waaaa-aaaam-qcagq-cai.icp0.io/)
+- **Frontend Canister ID**: [z4gvt-waaaa-aaaam-qcagq-cai](https://z4gvt-waaaa-aaaam-qcagq-cai.icp0.io/)
 - **Backend Canister ID**: qncn4-nqaaa-aaaah-qpwsq-cai
 
 ## 🌍 Transforming Crowdfunding  
