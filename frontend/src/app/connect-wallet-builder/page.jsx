@@ -136,7 +136,7 @@ const WalletConnect = () => {
 
       //await walletService.connectWallet(Principal.from(user?.principal || '').toText());
 
-      //const registrationResult = await actorInstance.register();
+      const registrationResult = await actorInstance.register();
 
       const userData = localStorage.getItem('user');
       const userSubmission = JSON.parse(userData);
