@@ -118,7 +118,7 @@ const WalletConnect = () => {
   const identity = useIdentity();
   const agent = useAgent();
 
-  const canisterId = process.env.NEXT_PUBLIC_DEV_CROWDFUNDING_CANISTER_ID;
+  const canisterId = process.env.NEXT_PUBLIC_CROWDFUNDING_CANISTER_ID;
 
   const DashboardProceed = async () => {
     try {
