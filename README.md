@@ -97,10 +97,12 @@ Bitchanga ensures a secure and trustworthy crowdfunding environment:
 
 Bitchanga is redefining how projects are funded and supported globally. Join us and be part of a decentralized, transparent, and inclusive ecosystem.
 
-👉 **Visit [Bitchanga](#)**  
 👉 **[MIT License](./LICENSE)**  
 
+---
+## Technical architecture
 
+![flowchart](./flowchart_with_rewards.jpeg)
 
 ---
 
