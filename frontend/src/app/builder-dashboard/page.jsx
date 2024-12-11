@@ -191,16 +191,10 @@ const BuilderDashboard = () => {
     }
   };*/
 
-
-
   const connectWallet = async () => {
     try {
       setError(null);
       setIsLoading(true);
-
-      if (!window?.ic?.plug) {
-        throw new Error('Plug wallet not found. Please install the Plug wallet extension.');
-      }
 
       await connect();
 
@@ -212,7 +206,7 @@ const BuilderDashboard = () => {
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const init = async () => {
       if (isConnecting) return;
       
@@ -228,12 +222,6 @@ const BuilderDashboard = () => {
 
     init();
   }, []); 
-
-  useEffect(() => {
-    console.log('user', user); 
-    console.log('identity', identity); 
-    console.log('agent', agent);
-  }, []);
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -260,18 +248,11 @@ const BuilderDashboard = () => {
       }
 
       userPrincipal = user?.principal;
-
-      console.log('user principal:', userPrincipal);
-
-      console.log('canister principal:', canisterPrincipal);
-
   
       const actorInstance = Actor.createActor(idlFactory, {
         agent,
         canisterId: canisterPrincipal,
       });
-
-      console.log('actor instance:', actorInstance);
   
       const account = {
         owner: userPrincipal,
@@ -279,6 +260,8 @@ const BuilderDashboard = () => {
       };
   
       const ckbtbalance = await actorInstance.icrc1_balance_of(account);
+
+      console.log('ckbt balance:', ckbtbalance);
       setBalance(ckbtbalance?.toString() || '0');
     } catch (err) {
       console.error('Error in fetchCkBTCBalance:', err);
@@ -296,13 +279,12 @@ const BuilderDashboard = () => {
     try {
       setError(null);
       await disconnect();
-      //setBalance(null);
+      setBalance(null);
     } catch (err) {
       console.error('Failed to disconnect:', err);
       setError('Failed to disconnect wallet');
     }
   };
-
 
   const WalletDetails = () => (
     <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border p-4 z-50">
