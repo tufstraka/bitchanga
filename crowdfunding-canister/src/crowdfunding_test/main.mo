@@ -120,7 +120,6 @@ actor Crowdfunding {
 
     type UserRegistration = {
         user : Principal;
-        purpose : Text;
         registrationTime : Time.Time;
         transactionId : Nat;
     };
@@ -167,7 +166,7 @@ actor Crowdfunding {
         Option.isSome(Array.find<Text>(TRUSTED_ORIGINS, func(trusted : Text) : Bool { trusted == origin }))
     };
 
-    private func isAdmin(principal : Principal) : Bool {
+    private func _isAdmin(principal : Principal) : Bool {
         Option.isSome(Array.find<Principal>(adminPrincipals, func(p : Principal) : Bool { p == principal }))
     };
 
@@ -230,9 +229,9 @@ actor Crowdfunding {
         btcAddress : Text,
         amount : Nat
     ) : async Result.Result<Text, RegistrationError> {
-        if (Principal.isAnonymous(caller)) {
+        /*if (Principal.isAnonymous(caller)) {
             return #err(#UserNotAuthenticated);
-        };
+        };*/
 
         // Validate amount
         if (amount < MIN_WITHDRAWAL_AMOUNT) {
@@ -301,10 +300,10 @@ actor Crowdfunding {
 
 
     // Registration Functions
-    public shared({ caller }) func register( purpose: Text ) : async Result.Result<RegistrationSuccess, RegistrationError> {
-        if (Principal.isAnonymous(caller)) {
+    public shared({ caller }) func register() : async Result.Result<RegistrationSuccess, RegistrationError> {
+        /*if (Principal.isAnonymous(caller)) {
             return #err(#UserNotAuthenticated);
-        };
+        };*/
 
         switch (registeredUsers.get(caller)) {
             case (?registration) {
@@ -332,7 +331,6 @@ actor Crowdfunding {
                 case (#Ok(_)) {
                     let registration : UserRegistration = {
                         user = caller;
-                        purpose = purpose;
                         registrationTime = Time.now();
                         transactionId = nextTransactionId;
                     };
@@ -362,9 +360,9 @@ actor Crowdfunding {
         title : Text,
         description : Text,
     ) : async Result.Result<Nat, RegistrationError> {
-        if (Principal.isAnonymous(caller)) {
+        /*if (Principal.isAnonymous(caller)) {
             return #err(#UserNotAuthenticated);
-        };
+        };*/
 
         if (not validateProjectDuration(durationInDays)) {
             return #err(#InvalidAmount);
@@ -398,9 +396,9 @@ actor Crowdfunding {
     };
 
     public shared({ caller }) func contribute(projectId : Nat, amount : Nat) : async Result.Result<(), RegistrationError> {
-        if (Principal.isAnonymous(caller)) {
+        /*if (Principal.isAnonymous(caller)) {
             return #err(#UserNotAuthenticated);
-        };
+        };*/
 
         if (amount == 0) {
             return #err(#InvalidAmount);
@@ -626,9 +624,9 @@ actor Crowdfunding {
     };
 
     public shared query({ caller }) func getAllRegisteredUsers() : async Result.Result<[UserRegistration], RegistrationError> {
-        if (not isAdmin(caller)) {
+        /*        if (not isAdmin(caller)) {
             return #err(#Unauthorized);
-        };
+        };*/
 
         let registrations = Buffer.Buffer<UserRegistration>(registeredUsers.size());
         for ((_, registration) in registeredUsers.entries()) {
@@ -639,17 +637,17 @@ actor Crowdfunding {
 
     // Admin Functions
     public shared({ caller }) func addAdmin(newAdmin : Principal) : async Result.Result<(), RegistrationError> {
-        if (not isAdmin(caller)) {
+        /*        if (not isAdmin(caller)) {
             return #err(#Unauthorized);
-        };
+        };*/
         adminPrincipals := Array.append(adminPrincipals, [newAdmin]);
         #ok(())
     };
 
     public shared({ caller }) func removeAdmin(adminToRemove : Principal) : async Result.Result<(), RegistrationError> {
-        if (not isAdmin(caller)) {
+        /*        if (not isAdmin(caller)) {
             return #err(#Unauthorized);
-        };
+        };*/
         
         if (Array.size(adminPrincipals) <= 1) {
             return #err(#Unauthorized);

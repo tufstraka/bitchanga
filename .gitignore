@@ -60,3 +60,6 @@
 /frontend/next-env.d.ts
 /backend(off-chain)/*.tsbuildinfo
 /backend(off-chain)/next-env.d.ts
+
+# dfx
+/frontend/.dfx

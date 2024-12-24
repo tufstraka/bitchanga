@@ -138,13 +138,12 @@ const WalletConnect = () => {
 
       const registrationResult = await actorInstance.register();
 
+      console.log('registrationResult', registrationResult);
+
       const userData = localStorage.getItem('user');
       const userSubmission = JSON.parse(userData);
 
       console.log('userSubmission', userSubmission);
-
-      let principal = user?.principal;
-      console.log('principal', principal);
 
       const targetAmount = parseFloat(userSubmission.targetAmount);
       if (isNaN(targetAmount) || targetAmount < 0) {
@@ -157,7 +156,6 @@ const WalletConnect = () => {
       const projectDescription = userSubmission.pitch;
 
       const createProject = await actorInstance.createFundingProject(
-        principal,
         targetAmountNat,
         timelineNat,
         projectName,
@@ -174,9 +172,9 @@ const WalletConnect = () => {
           fee: result.ok.fee
         });
         setTimeout(() => router.push('/builder-dashboard'), 2000);
-      } else if ('err' in result) {
-        setRegistrationStatus(Object.keys(result.err)[0]);
-        if ('AlreadyRegistered' in result.err) {
+      } else if ('err' in registrationResult) {
+        setRegistrationStatus(Object.keys(registrationResult.err)[0]);
+        if ('AlreadyRegistered' in registrationResult.err) {
           setRegistrationData({
             registrationTime: result.err.AlreadyRegistered.registrationTime
           });

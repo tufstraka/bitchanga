@@ -3,6 +3,10 @@
     "crowdfunding": {
       "main": "src/crowdfunding/main.mo",
       "type": "motoko"
+    },
+    "crowdfunding_test": {
+      "main": "src/crowdfunding_test/main.mo",
+      "type": "motoko"
     }
   },
   "defaults": {
